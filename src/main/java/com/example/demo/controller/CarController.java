@@ -9,6 +9,7 @@ import com.example.demo.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -69,6 +70,7 @@ public class CarController {
         if (car == null) throw new NullPointerException("note found");
         HashMap<String, BookedPeriod> idBooked = new HashMap<>();
         HashMap<String, String> mapUser = new HashMap<>();
+        HashMap<String, String> mapResponse = new HashMap<>();
 //        List<BookedPeriod> bookedPeriods = car.getBooked_periods();
         for (BookedPeriod bookedPeriod : car.getBooked_periods()) {
             idBooked.put(bookedPeriod.getOrder_id(), bookedPeriod);
@@ -83,13 +85,13 @@ public class CarController {
         for (String key:idBooked.keySet()) {
             for (String keyB:mapUser.keySet()) {
                 if (key.equals(keyB)){
-                    carmap.put(idBooked.get(key).getStart_date_time().toString(),mapUser.get(keyB));
+                    String start_date_time = idBooked.get(key).getStart_date_time()
+                            .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+                    mapResponse.put(start_date_time,mapUser.get(keyB));
                 }
             }
 
         }
-
-
-        return carmap;
+        return mapResponse;
     }
 }
