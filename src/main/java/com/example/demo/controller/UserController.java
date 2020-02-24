@@ -23,24 +23,33 @@ public class UserController {
     UserRepository  userRepository;
     HashMap<String,String> map = new HashMap<>();
 
-    @GetMapping
-    public HashMap<String,String> findUsers() {
+    @GetMapping(value = "/tokens/")
+    public HashMap<String,String> findTokens() {
 
         List<User> users= userRepository.findAll();
         for (User user:users) {
-
-
-//        User user=users.get(0);
             String email = user.getEmail();
             String password = user.getPassword();
             byte[] base = Base64.decode(password);
             String str = new String(base);
             str = email+":"+str;
             String token = Base64.encode(str.getBytes());
-            map.put(email, token);
+            map.put(email, "                    " + token);
         }
     return map;
-
     }
 
+    @GetMapping(value = "/passwords/")
+    public HashMap<String,String> findPasswords() {
+
+        List<User> users= userRepository.findAll();
+        for (User user:users) {
+            String email = user.getEmail();
+            String password = user.getPassword();
+            byte[] base = Base64.decode(password);
+            String str = new String(base);
+            map.put(email, "                    " + str);
+        }
+        return map;
+    }
 }
