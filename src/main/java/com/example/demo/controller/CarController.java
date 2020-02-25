@@ -1,9 +1,9 @@
 package com.example.demo.controller;
 
-import com.example.demo.model.documents.BookedCars;
-import com.example.demo.model.documents.BookedPeriod;
-import com.example.demo.model.documents.Car;
-import com.example.demo.model.documents.User;
+import com.example.demo.documents.BookedCars;
+import com.example.demo.documents.BookedPeriod;
+import com.example.demo.documents.Car;
+import com.example.demo.documents.User;
 import com.example.demo.repository.CarRepository;
 import com.example.demo.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -94,4 +94,59 @@ public class CarController {
         }
         return mapResponse;
     }
+
+//    @GetMapping(value = "/booked_all_cars/")
+//    public HashMap<String, HashMap<String, String>> findBookedAllCars() {
+//        HashMap<String, HashMap<String, String>> mapResponse = new HashMap<>();
+//        for (Car car:carRepository.findAll()) {
+//            List<User> users = userRepository.findAll();
+//            if (car == null) throw new NullPointerException("note found");
+//            HashMap<String, BookedPeriod> idBooked = new HashMap<>();
+//            HashMap<String, String> mapUser = new HashMap<>();
+//            HashMap<String, String> mapBooked = new HashMap<>();
+//            for (BookedPeriod bookedPeriod : car.getBooked_periods()) {
+//                idBooked.put(bookedPeriod.getOrder_id(), bookedPeriod);
+//                for (User user : users) {
+//                    for (BookedCars bookedCars : user.getBookedCars()) {
+//                        if (bookedPeriod.getOrder_id().equals(bookedCars.getBooked_period().getOrder_id())) {
+//                            mapUser.put(bookedPeriod.getOrder_id(), user.getEmail());
+//                        }
+//                    }
+//                }
+//            }
+//            for (String key:idBooked.keySet()) {
+//                for (String keyB:mapUser.keySet()) {
+//                    if (key.equals(keyB)){
+//                        String start_date_time = idBooked.get(key).getStart_date_time()
+//                                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+//                        mapBooked.put(start_date_time,mapUser.get(keyB));
+//                    }
+//                }
+//
+//            }
+//            mapResponse.put(car.getSerial_number(), mapBooked);
+//        }
+//        return mapResponse;
+//    }
+
+    @GetMapping(value = "/booked_all_cars/")
+    public HashMap<String, List<String>> findBookedAllCars() {
+        HashMap<String, List<String>> mapResponse = new HashMap<>();
+        for (Car car:carRepository.findAll()) {
+            List<String> list = new ArrayList<>();
+            for (BookedPeriod bookedPeriod:car.getBooked_periods()) {
+                list.add(bookedPeriod.getOrder_id());
+            }
+            mapResponse.put(car.getSerial_number(), list);
+        }
+        return mapResponse;
+    }
+
+    @GetMapping(value = "/all/")
+    public List<Car> findAllCars() {
+        List<Car> cars = carRepository.findAll();
+        return cars;
+    }
+
+
 }

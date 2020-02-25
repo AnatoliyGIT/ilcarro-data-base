@@ -1,6 +1,6 @@
 package com.example.demo.controller;
 
-import com.example.demo.model.documents.User;
+import com.example.demo.documents.User;
 import com.example.demo.repository.UserRepository;
 
 

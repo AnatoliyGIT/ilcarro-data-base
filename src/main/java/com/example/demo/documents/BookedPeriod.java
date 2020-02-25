@@ -1,15 +1,14 @@
-package com.example.demo.model.documents;
+package com.example.demo.documents;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
-@Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Setter
+@Getter
+@ToString
 @Builder
 public class BookedPeriod {
     private String order_id;

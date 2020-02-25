@@ -1,4 +1,4 @@
-package com.example.demo.model.documents;
+package com.example.demo.documents;
 
 import lombok.*;
 

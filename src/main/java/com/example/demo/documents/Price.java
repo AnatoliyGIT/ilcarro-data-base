@@ -1,15 +1,15 @@
-package com.example.demo.model.documents;
+package com.example.demo.documents;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Data
 @Builder
-public class Location {
-    private Double longitude;
-    private Double latitude;
+public class Price {
+    private String currency;
+    private Double price_per_day;
 }

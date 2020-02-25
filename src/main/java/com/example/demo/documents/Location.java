@@ -1,16 +1,15 @@
-package com.example.demo.model.documents;
+package com.example.demo.documents;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
 @Builder
-
-public class BookedCars {
-    private String serial_number;
-    private BookedPeriod booked_period;
+public class Location {
+    private Double longitude;
+    private Double latitude;
 }

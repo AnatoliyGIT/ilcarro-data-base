@@ -1,17 +1,17 @@
-package com.example.demo.model.documents;
+package com.example.demo.documents;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.ArrayList;
 
-
-@Data
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
+@Setter
+@Getter
+@ToString
+@Builder
 @Document(collection = "cars")
 public class Car {
     @Id
@@ -39,5 +39,5 @@ public class Car {
     private Owner owner;
     private ArrayList<BookedPeriod> booked_periods;
     private Statistics statistics;
+    private ArrayList<Comment> comments;
 }
-

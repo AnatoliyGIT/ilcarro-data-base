@@ -1,19 +1,17 @@
-package com.example.demo.model.documents;
+package com.example.demo.documents;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Collection;
 
-@Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Setter
+@Getter
+@ToString
 @Builder
 @Document(collection = "users")
 public class User {
