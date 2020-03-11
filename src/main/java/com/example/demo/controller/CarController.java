@@ -1,18 +1,17 @@
 package com.example.demo.controller;
 
-import com.example.demo.documents.BookedCars;
-import com.example.demo.documents.BookedPeriod;
-import com.example.demo.documents.Car;
-import com.example.demo.documents.User;
+import com.example.demo.documents.*;
 import com.example.demo.repository.CarRepository;
 import com.example.demo.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 @RestController
@@ -20,24 +19,26 @@ import java.util.stream.Collectors;
 
 public class CarController {
 
-    @Autowired
     CarRepository carRepository;
-    @Autowired
     UserRepository userRepository;
-    HashMap<String, List<String>> map = new HashMap<>();
-    HashMap<String, String> carmap = new HashMap<>();
-    HashMap<String, Timer> timerMap = new HashMap<>();
+    TreeMap<String, List<String>> map = new TreeMap<>();
+    TreeMap<String, String> carMap = new TreeMap<>();
+
+    @Autowired
+    public CarController(CarRepository carRepository, UserRepository userRepository) {
+        this.carRepository = carRepository;
+        this.userRepository = userRepository;
+    }
 
 
     @GetMapping
-    public HashMap<String, List<String>> findOwners() {
+    public TreeMap<String, List<String>> findOwners() {
         List<User> users = userRepository.findAll();
         List<Car> cars = carRepository.findAll();
         for (User user : users) {
-            List<Car> ownerCars = new ArrayList<>();
             List<String> numbers = new ArrayList<>();
-            ownerCars.addAll(cars.stream().filter(car -> car.getOwner().getEmail()
-                    .equals(user.getEmail())).collect(Collectors.toList()));
+            List<Car> ownerCars = cars.stream().filter(car -> car.getOwner().getEmail()
+                    .equals(user.getEmail())).collect(Collectors.toList());
             ownerCars.forEach(car -> numbers.add(car.getSerial_number()));
             map.put(user.getEmail(), numbers);
         }
@@ -45,7 +46,7 @@ public class CarController {
     }
 
     @GetMapping(value = "/geo/all/")
-    public HashMap<String, String> findGeoCars() {
+    public TreeMap<String, String> findGeoCars() {
         List<Car> cars = carRepository.findAll();
         for (Car car : cars) {
             String str = "                  ";
@@ -60,19 +61,19 @@ public class CarController {
             }
             String carNumber = car.getSerial_number()
                     + " (" + car.getMake() + " " + car.getModel() + ")";
-            carmap.put(carNumber, str + car.getPick_up_place().getGeolocation());
+            carMap.put(carNumber, str + car.getPick_up_place().getGeolocation());
         }
-        return carmap;
+        return carMap;
     }
 
     @GetMapping(value = "/booked/")
-    public HashMap<String, String> findBookedCar(String serial_number) {
+    public TreeMap<String, String> findBookedCar(String serial_number) {
         Car car = carRepository.findById(serial_number).orElse(null);
         List<User> users = userRepository.findAll();
         if (car == null) throw new NullPointerException("note found");
-        HashMap<String, BookedPeriod> idBooked = new HashMap<>();
-        HashMap<String, String> mapUser = new HashMap<>();
-        HashMap<String, String> mapResponse = new HashMap<>();
+        TreeMap<String, BookedPeriod> idBooked = new TreeMap<>();
+        TreeMap<String, String> mapUser = new TreeMap<>();
+        TreeMap<String, String> mapResponse = new TreeMap<>();
         for (BookedPeriod bookedPeriod : car.getBooked_periods()) {
             idBooked.put(bookedPeriod.getOrder_id(), bookedPeriod);
             for (User userId : users) {
@@ -96,8 +97,8 @@ public class CarController {
     }
 
     @GetMapping(value = "/booked_all_cars/")
-    public HashMap<String, List<String>> findBookedAllCars() {
-        HashMap<String, List<String>> mapResponse = new HashMap<>();
+    public TreeMap<String, List<String>> findBookedAllCars() {
+        TreeMap<String, List<String>> mapResponse = new TreeMap<>();
         for (Car car : carRepository.findAll()) {
             List<String> list = new ArrayList<>();
             for (BookedPeriod bookedPeriod : car.getBooked_periods()) {
@@ -108,4 +109,29 @@ public class CarController {
         return mapResponse;
     }
 
+    @GetMapping(value = "/reserved_all_cars/")
+    public TreeMap<String, List<String>> findReservedAllCars() {
+        TreeMap<String, List<String>> mapResponse = new TreeMap<>();
+        for (Car car : carRepository.findAll()) {
+            List<String> list = new ArrayList<>();
+            for (ReservedPeriod reservedPeriod : car.getReserved_periods()) {
+                list.add(reservedPeriod.getStart_date_time().toLocalDate().toString() + " "
+                        + reservedPeriod.getStart_date_time().toLocalTime().toString() + " - "
+                        + reservedPeriod.getEnd_date_time().toLocalDate().toString() + " "
+                        + reservedPeriod.getEnd_date_time().toLocalTime().toString());
+            }
+            mapResponse.put(car.getSerial_number(), list);
+        }
+        return mapResponse;
+    }
+
+    @GetMapping("getCar")
+    public Car getCar(String serial_number) {
+        return carRepository.findById(serial_number).orElse(null);
+    }
+
+    @GetMapping(value = "/tree_cars/")
+    public List<Car> findTreePopularCars() {
+        return carRepository.getThreePopularsCar();
+    }
 }

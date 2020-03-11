@@ -38,6 +38,7 @@ public class Car {
     private ArrayList<String> image_url;
     private Owner owner;
     private ArrayList<BookedPeriod> booked_periods;
+    private ArrayList<ReservedPeriod> reserved_periods;
     private Statistics statistics;
     private ArrayList<Comment> comments;
 }
