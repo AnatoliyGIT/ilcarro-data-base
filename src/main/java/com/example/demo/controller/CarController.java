@@ -4,9 +4,7 @@ import com.example.demo.documents.*;
 import com.example.demo.repository.CarRepository;
 import com.example.demo.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -66,7 +64,7 @@ public class CarController {
         return carMap;
     }
 
-    @GetMapping(value = "/booked/")
+    @GetMapping(value = "/booked_pay/")
     public TreeMap<String, String> findBookedCar(String serial_number) {
         Car car = carRepository.findById(serial_number).orElse(null);
         List<User> users = userRepository.findAll();
@@ -125,10 +123,38 @@ public class CarController {
         return mapResponse;
     }
 
-    @GetMapping("getCar")
+    @GetMapping("/getCar/")
     public Car getCar(String serial_number) {
         return carRepository.findById(serial_number).orElse(null);
     }
+
+    @GetMapping("/get_statistics/")
+    public List<String> getStatistics() {
+        List<String> list = new ArrayList<>();
+        for (Car car:carRepository.findAll()) {
+            list.add(car.getSerial_number() + " -> bookeds: " + car.getBooked_periods().size()
+                    + "; trips: " + car.getStatistics().getTrips());
+        }
+        return list;
+    }
+
+    @PostMapping("/del_trip_by_car")
+    public String delTrips(String serial_number) {
+        String str = "";
+        Car car = carRepository.findById(serial_number).orElseThrow();
+        str = car.getStatistics().getRating().toString();
+        car.getStatistics().setTrips(0);
+        User owner = userRepository.findById(car.getOwner().getEmail()).orElseThrow();
+        Car carOwner = owner.getOwnerCars().stream().filter(c -> c.getSerial_number()
+                .equals(car.getSerial_number())).findFirst().orElseThrow();
+        carOwner.getStatistics().setTrips(0);
+        owner.getOwnerCars().removeIf(c -> c.getSerial_number().equals(car.getSerial_number()));
+        owner.getOwnerCars().add(carOwner);
+//        userRepository.save(owner);
+//        carRepository.save(car);
+        return str + " -> " + car.getStatistics().getRating().toString();
+    }
+
 
     @GetMapping(value = "/tree_cars/")
     public List<Car> findTreePopularCars() {
