@@ -8,6 +8,7 @@ import com.example.demo.repository.CarRepository;
 import com.example.demo.repository.UserRepository;
 import org.bson.internal.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -151,7 +152,7 @@ public class UserController {
         int countCars = carRepository.findAll().size();
         int countUsers = 0;
         int countDeletedUsers = 0;
-        for (User user:userRepository.findAll()) {
+        for (User user : userRepository.findAll()) {
             if (user.isActive()) {
                 countUsers++;
             } else {
@@ -170,7 +171,7 @@ public class UserController {
         for (User user : userRepository.findAll()) {
             List<String> list = new ArrayList<>();
             if (user.isActive()) {
-                for (Car car:user.getOwnerCars()) {
+                for (Car car : user.getOwnerCars()) {
                     carRepository.findById(car.getSerial_number())
                             .ifPresent(carFromRepo -> list.add(car.getSerial_number()));
                 }
@@ -180,5 +181,12 @@ public class UserController {
             }
         }
         return map;
+    }
+
+    @DeleteMapping("/delHistory")
+    public void delHistory(String email) {
+        User user = userRepository.findById(email).orElseThrow();
+        user.setHistory(new ArrayList<>());
+        userRepository.save(user);
     }
 }
