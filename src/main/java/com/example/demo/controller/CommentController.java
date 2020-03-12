@@ -13,6 +13,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TimeZone;
 
 @RestController
 @RequestMapping("/comment")
@@ -40,5 +41,18 @@ public class CommentController {
         Car car = carRepository.findById(serial_number)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Car not found"));
         return car.getComments();
+    }
+
+    @GetMapping(value = "/get_time")
+    public String getTime() {
+        String[] ids = TimeZone.getAvailableIDs();
+        String a ="";
+        for (String str:ids) {
+            if (str.equals("Asia/Jerusalem")) {
+                a = TimeZone.getDefault().getDisplayName();
+                return str + "; " + a;
+            }
+        }
+        return null;
     }
 }

@@ -98,11 +98,13 @@ public class UserController {
         TreeMap<String, List<String>> mapResponse = new TreeMap<>();
         for (User user : userRepository.findAll()) {
             List<String> list = new ArrayList<>();
-            for (BookedCars bookedCars : user.getBookedCars()) {
-                list.add(bookedCars.getBooked_period().getOrder_id()
-                        + " - " + bookedCars.getBooked_period().getPerson_who_booked().getFirst_name());
+            if (user.isActive()) {
+                for (BookedCars bookedCars : user.getBookedCars()) {
+                    list.add(bookedCars.getBooked_period().getOrder_id()
+                            + " - " + bookedCars.getBooked_period().getPerson_who_booked().getFirst_name());
+                }
+                mapResponse.put(user.getEmail(), list);
             }
-            mapResponse.put(user.getEmail(), list);
         }
         return mapResponse;
     }
@@ -111,12 +113,14 @@ public class UserController {
     public TreeMap<String, List<String>> findHistoryAllUsers() {
         TreeMap<String, List<String>> mapResponse = new TreeMap<>();
         for (User user : userRepository.findAll()) {
-            List<String> list = new ArrayList<>();
-            for (History history : user.getHistory()) {
-                list.add(history.getHistory().getOrder_id()
-                        + " - " + history.getHistory().getPerson_who_booked().getFirst_name());
+            if (user.isActive()) {
+                List<String> list = new ArrayList<>();
+                for (History history : user.getHistory()) {
+                    list.add(history.getHistory().getOrder_id()
+                            + " - " + history.getHistory().getPerson_who_booked().getFirst_name());
+                }
+                mapResponse.put(user.getEmail(), list);
             }
-            mapResponse.put(user.getEmail(), list);
         }
         return mapResponse;
     }
@@ -142,10 +146,22 @@ public class UserController {
 //    }
 
     @GetMapping(value = "/find_counts_users_and_cars")
-    public String findCounts() {
+    public String[] findCounts() {
+        String[] counts = new String[3];
         int countCars = carRepository.findAll().size();
-        int countUsers = userRepository.findAll().size();
-        return "AllCars: " + countCars + ", AllUsers: " + countUsers;
+        int countUsers = 0;
+        int countDeletedUsers = 0;
+        for (User user:userRepository.findAll()) {
+            if (user.isActive()) {
+                countUsers++;
+            } else {
+                countDeletedUsers++;
+            }
+        }
+        counts[0] = "AllCars -> " + countCars;
+        counts[1] = "All Users is Active -> " + countUsers;
+        counts[2] = "All Users is deleted -> " + countDeletedUsers;
+        return counts;
     }
 
     @GetMapping(value = "/find_cars_and_owners")
@@ -153,12 +169,14 @@ public class UserController {
         TreeMap<String, List<String>> map = new TreeMap<>();
         for (User user : userRepository.findAll()) {
             List<String> list = new ArrayList<>();
-            for (Car car:user.getOwnerCars()) {
-                carRepository.findById(car.getSerial_number())
-                        .ifPresent(carFromRepo -> list.add(car.getSerial_number()));
-            }
-            if (!list.isEmpty()) {
-                map.put(user.getEmail(), list);
+            if (user.isActive()) {
+                for (Car car:user.getOwnerCars()) {
+                    carRepository.findById(car.getSerial_number())
+                            .ifPresent(carFromRepo -> list.add(car.getSerial_number()));
+                }
+                if (!list.isEmpty()) {
+                    map.put(user.getEmail(), list);
+                }
             }
         }
         return map;

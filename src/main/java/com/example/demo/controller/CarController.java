@@ -150,8 +150,8 @@ public class CarController {
         carOwner.getStatistics().setTrips(0);
         owner.getOwnerCars().removeIf(c -> c.getSerial_number().equals(car.getSerial_number()));
         owner.getOwnerCars().add(carOwner);
-//        userRepository.save(owner);
-//        carRepository.save(car);
+        userRepository.save(owner);
+        carRepository.save(car);
         return str + " -> " + car.getStatistics().getRating().toString();
     }
 
