@@ -1,21 +1,19 @@
 package com.example.demo.repository;
 
 import com.example.demo.documents.Car;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.stereotype.Repository;
 
-import java.util.ArrayList;
 import java.util.List;
 
+@Repository
 public class CarCustomRepositoryImpl implements CarCustomRepository {
     MongoTemplate mongoTemplate;
-    CarComparator carComparator;
 
-    @Autowired
+
     public CarCustomRepositoryImpl(MongoTemplate mongoTemplate) {
         this.mongoTemplate = mongoTemplate;
     }

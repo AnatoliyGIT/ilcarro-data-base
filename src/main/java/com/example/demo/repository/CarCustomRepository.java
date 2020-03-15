@@ -1,6 +1,5 @@
 package com.example.demo.repository;
 
-import com.example.demo.documents.BookedPeriod;
 import com.example.demo.documents.Car;
 
 import java.util.List;

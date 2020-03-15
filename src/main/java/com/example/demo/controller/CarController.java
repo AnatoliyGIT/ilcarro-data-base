@@ -1,11 +1,16 @@
 package com.example.demo.controller;
 
 import com.example.demo.documents.*;
+import com.example.demo.repository.CarComparatorBookedPeriod;
 import com.example.demo.repository.CarRepository;
 import com.example.demo.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -130,12 +135,14 @@ public class CarController {
 
     @GetMapping("/get_statistics/")
     public List<String> getStatistics() {
-        List<String> list = new ArrayList<>();
-        for (Car car:carRepository.findAll()) {
-            list.add(car.getSerial_number() + " -> bookeds: " + car.getBooked_periods().size()
+        List<Car> list = carRepository.findAll();
+        list.sort(new CarComparatorBookedPeriod());
+        List<String> stringList = new ArrayList<>();
+        for (Car car:list) {
+            stringList.add(car.getSerial_number() + " -> bookeds: " + car.getBooked_periods().size()
                     + "; trips: " + car.getStatistics().getTrips());
         }
-        return list;
+        return stringList;
     }
 
     @PostMapping("/del_trip_by_car")
@@ -159,5 +166,23 @@ public class CarController {
     @GetMapping(value = "/tree_cars/")
     public List<Car> findTreePopularCars() {
         return carRepository.getThreePopularsCar();
+    }
+
+    @GetMapping(value = "/time/")
+    public List<String> findTimesForCar() {
+        List<Car> cars = carRepository.findAll();
+        List<String> list = new ArrayList<>();
+        for (Car car:cars) {
+            list.add(car.getSerial_number() + " -> " + LocalDateTime.now()
+                    .plusHours(correctionTimeZone(car.getPick_up_place()
+                            .getGeolocation().getLongitude())).format(DateTimeFormatter
+                            .ofPattern("dd.MM.yyyy HH:mm")));
+        }
+        return list;
+    }
+
+    private int correctionTimeZone(Double l) {
+        int longitude = (int) Math.floor(l);
+        return Math.floorDiv(longitude,15);
     }
 }

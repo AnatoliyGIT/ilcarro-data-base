@@ -159,9 +159,9 @@ public class UserController {
                 countDeletedUsers++;
             }
         }
-        counts[0] = "AllCars -> " + countCars;
-        counts[1] = "All Users is Active -> " + countUsers;
-        counts[2] = "All Users is deleted -> " + countDeletedUsers;
+        counts[0] = "All cars in repository ->  " + countCars;
+        counts[1] = "All users is active ->     " + countUsers;
+        counts[2] = "All users is not active -> " + countDeletedUsers;
         return counts;
     }
 
