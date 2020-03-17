@@ -102,10 +102,40 @@ public class CarController {
     @GetMapping(value = "/booked_all_cars/")
     public TreeMap<String, List<String>> findBookedAllCars() {
         TreeMap<String, List<String>> mapResponse = new TreeMap<>();
+        List<User> users = userRepository.findAll();
         for (Car car : carRepository.findAll()) {
             List<String> list = new ArrayList<>();
             for (BookedPeriod bookedPeriod : car.getBooked_periods()) {
-                list.add(bookedPeriod.getOrder_id() + " - " + bookedPeriod.getPerson_who_booked().getFirst_name());
+                List<User> usersCar = new ArrayList<>();
+                for (User user:users) {
+                    for (BookedCars bookedCars:user.getBookedCars()) {
+                        if (bookedCars.getSerial_number().equals(car.getSerial_number())) {
+                            usersCar.add(user);
+                        }
+                    }
+                }
+                User userCar = null;
+                for (User user:usersCar) {
+                    for (BookedCars bookedCars: user.getBookedCars()) {
+                        if (bookedCars.getBooked_period().getOrder_id().equals(bookedPeriod.getOrder_id())) {
+                            userCar = user;
+                            break;
+                        }
+                    }
+                }
+                boolean flag = bookedPeriod.getEnd_date_time().isBefore(LocalDateTime.now());
+                String trip;
+                if (flag) {
+                    trip = "YES";
+                } else {
+                    trip = "NO";
+                }
+                assert userCar != null;
+                list.add(bookedPeriod.getOrder_id() + " -> paid: " + bookedPeriod.isPaid()
+                        + " / trip: " + trip
+                        + " / " + userCar.getFirstName() + " " + userCar.getSecondName()
+                        + " / " + userCar.getEmail() + " / " + bookedPeriod.getAmount());
+
             }
             mapResponse.put(car.getSerial_number(), list);
         }
