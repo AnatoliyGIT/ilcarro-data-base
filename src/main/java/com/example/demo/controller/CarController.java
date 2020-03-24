@@ -5,10 +5,7 @@ import com.example.demo.repository.CarComparatorBookedPeriod;
 import com.example.demo.repository.CarRepository;
 import com.example.demo.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -130,11 +127,16 @@ public class CarController {
                 } else {
                     trip = "NO";
                 }
-                assert userCar != null;
+                String email;
+                if (userCar == null) {
+                    email = "............";
+                } else {
+                    email = userCar.getEmail();
+                }
                 list.add(bookedPeriod.getOrder_id() + " -> paid: " + bookedPeriod.isPaid()
                         + " / trip: " + trip
-                        + " / " + userCar.getFirstName() + " " + userCar.getSecondName()
-                        + " / " + userCar.getEmail() + " / " + bookedPeriod.getAmount());
+                        + " / " + bookedPeriod.getPerson_who_booked().getFirst_name()
+                        + " / " + email + " / " + bookedPeriod.getAmount());
 
             }
             mapResponse.put(car.getSerial_number(), list);
@@ -211,8 +213,24 @@ public class CarController {
         return list;
     }
 
+    @DeleteMapping(value = "delete_period_false")
+    public void deletePeriodFalse(String serial_number_auto, String bookedId) {
+        Car car = carRepository.findById(serial_number_auto).orElseThrow();
+        ArrayList<BookedPeriod> bookedPeriodList = car.getBooked_periods();
+        bookedPeriodList.removeIf(bookedPeriod -> bookedPeriod.getOrder_id().equals(bookedId));
+        car.setBooked_periods(bookedPeriodList);
+        carRepository.save(car);
+
+    }
+
+    @GetMapping(value = "findBookedPeriods")
+    public List<BookedPeriod> findBookedPeriods(String serial_number) {
+        Car car = carRepository.findById(serial_number).orElseThrow();
+        return car.getBooked_periods();
+    }
+
     private int correctionTimeZone(Double l) {
         int longitude = (int) Math.floor(l);
-        return Math.floorDiv(longitude,15);
+        return Math.floorDiv(longitude, 15);
     }
 }
