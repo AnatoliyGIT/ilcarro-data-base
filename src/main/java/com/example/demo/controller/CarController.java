@@ -177,22 +177,25 @@ public class CarController {
         return stringList;
     }
 
-    @PostMapping("/del_trip_by_car")
-    public String delTrips(String serial_number) {
-        String str = "";
-        Car car = carRepository.findById(serial_number).orElseThrow();
-        str = car.getStatistics().getRating().toString();
-        car.getStatistics().setTrips(0);
-        User owner = userRepository.findById(car.getOwner().getEmail()).orElseThrow();
-        Car carOwner = owner.getOwnerCars().stream().filter(c -> c.getSerial_number()
-                .equals(car.getSerial_number())).findFirst().orElseThrow();
-        carOwner.getStatistics().setTrips(0);
-        owner.getOwnerCars().removeIf(c -> c.getSerial_number().equals(car.getSerial_number()));
-        owner.getOwnerCars().add(carOwner);
-        userRepository.save(owner);
-        carRepository.save(car);
-        return str + " -> " + car.getStatistics().getRating().toString();
-    }
+//    @PostMapping("/del_trip_by_car")
+//    public String delTrips(String serial_number) {
+//        String str = "";
+//        Car car = carRepository.findById(serial_number).orElse(null);
+//        assert car != null;
+//        str = car.getStatistics().getRating().toString();
+//        car.getStatistics().setTrips(0);
+//        User owner = userRepository.findById(car.getOwner().getEmail()).orElse(null);
+//        assert owner != null;
+//        Car carOwner = owner.getOwnerCars().stream().filter(c -> c.getSerial_number()
+//                .equals(car.getSerial_number())).findFirst().orElse(null);
+//        assert carOwner != null;
+//        carOwner.getStatistics().setTrips(0);
+//        owner.getOwnerCars().removeIf(c -> c.getSerial_number().equals(car.getSerial_number()));
+//        owner.getOwnerCars().add(carOwner);
+//        userRepository.save(owner);
+//        carRepository.save(car);
+//        return str + " -> " + car.getStatistics().getRating().toString();
+//    }
 
 
     @GetMapping(value = "/tree_cars/")
@@ -215,7 +218,8 @@ public class CarController {
 
     @DeleteMapping(value = "delete_period_false")
     public void deletePeriodFalse(String serial_number_auto, String bookedId) {
-        Car car = carRepository.findById(serial_number_auto).orElseThrow();
+        Car car = carRepository.findById(serial_number_auto).orElse(null);
+        assert car != null;
         ArrayList<BookedPeriod> bookedPeriodList = car.getBooked_periods();
         bookedPeriodList.removeIf(bookedPeriod -> bookedPeriod.getOrder_id().equals(bookedId));
         car.setBooked_periods(bookedPeriodList);
@@ -225,7 +229,8 @@ public class CarController {
 
     @GetMapping(value = "findBookedPeriods")
     public List<BookedPeriod> findBookedPeriods(String serial_number) {
-        Car car = carRepository.findById(serial_number).orElseThrow();
+        Car car = carRepository.findById(serial_number).orElse(null);
+        assert car != null;
         return car.getBooked_periods();
     }
 

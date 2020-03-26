@@ -8,7 +8,6 @@ import com.example.demo.repository.CarRepository;
 import com.example.demo.repository.UserRepository;
 import org.bson.internal.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -183,10 +182,11 @@ public class UserController {
         return map;
     }
 
-    @DeleteMapping("/delHistory")
-    public void delHistory(String email) {
-        User user = userRepository.findById(email).orElseThrow();
-        user.setHistory(new ArrayList<>());
-        userRepository.save(user);
-    }
+//    @DeleteMapping("/delHistory")
+//    public void delHistory(String email) {
+//        User user = userRepository.findById(email).orElse(null);
+//        assert user != null;
+//        user.setHistory(new ArrayList<>());
+//        userRepository.save(user);
+//    }
 }
