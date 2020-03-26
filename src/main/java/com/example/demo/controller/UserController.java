@@ -41,7 +41,7 @@ public class UserController {
             String str = new String(base);
             str = email + ":" + str;
             String token = Base64.encode(str.getBytes());
-            map.put(email, "                    " + token);
+            map.put("(" + user.getRegistrationDate() + ") " + email, "                    " + token);
         }
         return map;
     }
@@ -55,7 +55,7 @@ public class UserController {
             String password = user.getPassword();
             byte[] base = Base64.decode(password);
             String str = new String(base);
-            map.put(email, "                    " + str);
+            map.put("(" + user.getRegistrationDate() + ") " + email, "                    " + str);
         }
         return map;
     }
