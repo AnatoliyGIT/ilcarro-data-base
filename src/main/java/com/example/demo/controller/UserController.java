@@ -1,16 +1,13 @@
 package com.example.demo.controller;
 
-import com.example.demo.documents.BookedCars;
-import com.example.demo.documents.Car;
-import com.example.demo.documents.History;
-import com.example.demo.documents.User;
+import com.example.demo.documents.*;
 import com.example.demo.repository.CarRepository;
 import com.example.demo.repository.UserRepository;
 import org.bson.internal.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,8 +28,9 @@ public class UserController {
     }
 
     @GetMapping(value = "/find_tokens/")
-    public TreeMap<String, String> findTokens() {
-
+    public TreeMap<String, String> findTokens(@RequestHeader("Authorization") String tokenAdmin) {
+        if(!tokenAdmin.equals("YW5hdG9seUBtYWlsLmNvbTpBbmF0b2x5MjAyMDIw"))
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Admin unauthorized");
         List<User> users = userRepository.findAll();
         for (User user : users) {
             String email = user.getEmail();
@@ -47,8 +45,9 @@ public class UserController {
     }
 
     @GetMapping(value = "/find_passwords/")
-    public TreeMap<String, String> findPasswords() {
-
+    public TreeMap<String, String> findPasswords(@RequestHeader("Authorization") String tokenAdmin) {
+        if(!tokenAdmin.equals("YW5hdG9seUBtYWlsLmNvbTpBbmF0b2x5MjAyMDIw"))
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Admin unauthorized");
         List<User> users = userRepository.findAll();
         for (User user : users) {
             String email = user.getEmail();
@@ -60,38 +59,40 @@ public class UserController {
         return map;
     }
 
-//    @DeleteMapping(value = "/delete_all_lists/")
-//    public void deleteAllLists(String email) {
-//        User user = userRepository.findById(email).orElse(null);
-//        if (user == null) {
-//            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User Not Found");
-//        }
-//        user.setComments(new ArrayList<>());
-//        user.setHistory(new ArrayList<>());
-//        user.setBookedCars(new ArrayList<>());
-//        ArrayList<Car> cars = user.getOwnerCars();
-//        for (Car car : cars) {
-//            car.setBooked_periods(new ArrayList<>());
-//            car.setStatistics(Statistics.builder()
-//                    .rating(0)
-//                    .trips(0)
-//                    .build());
-//            Car carFromRepository = carRepository.findById(car.getSerial_number()).orElse(null);
-//            if (carFromRepository == null) {
-//                cars.remove(car);
-//                continue;
-//            }
-//            carFromRepository.setBooked_periods(new ArrayList<>());
-//            carFromRepository.setStatistics(Statistics.builder()
-//                    .trips(0)
-//                    .rating(0)
-//                    .build());
-//            carFromRepository.setComments(new ArrayList<>());
-////            carRepository.save(carFromRepository);
-//        }
-//        user.setOwnerCars(cars);
-////        userRepository.save(user);
-//    }
+    @DeleteMapping(value = "/delete_all_lists_from_user/")
+    public void deleteAllLists(@RequestHeader("Authorization") String tokenAdmin, String email) {
+        if(!tokenAdmin.equals("YW5hdG9seUBtYWlsLmNvbTpBbmF0b2x5MjAyMDIw"))
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Admin unauthorized");
+        User user = userRepository.findById(email).orElse(null);
+        if (user == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User Not Found");
+        }
+        user.setComments(new ArrayList<>());
+        user.setHistory(new ArrayList<>());
+        user.setBookedCars(new ArrayList<>());
+        ArrayList<Car> cars = user.getOwnerCars();
+        for (Car car : cars) {
+            car.setBooked_periods(new ArrayList<>());
+            car.setStatistics(Statistics.builder()
+                    .rating(0)
+                    .trips(0)
+                    .build());
+            Car carFromRepository = carRepository.findById(car.getSerial_number()).orElse(null);
+            if (carFromRepository == null) {
+                cars.remove(car);
+                continue;
+            }
+            carFromRepository.setBooked_periods(new ArrayList<>());
+            carFromRepository.setStatistics(Statistics.builder()
+                    .trips(0)
+                    .rating(0)
+                    .build());
+            carFromRepository.setComments(new ArrayList<>());
+            carRepository.save(carFromRepository);
+        }
+        user.setOwnerCars(cars);
+        userRepository.save(user);
+    }
 
     @GetMapping(value = "/find_booked_cars_all_users/")
     public TreeMap<String, List<String>> findBookedAllUsers() {
@@ -136,14 +137,20 @@ public class UserController {
         return list;
     }
 
-//    @DeleteMapping(value = "/delete_user")
-//    public void deleteUserWithEmail(String email) {
-//        User user = userRepository.findById(email).orElse(null);
-//        if (user == null) {
-//            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
-//        }
-////        userRepository.delete(user);
-//    }
+    @DeleteMapping(value = "/delete_user_with_cars")
+    public void deleteUserByEmail(@RequestHeader("Authorization") String tokenAdmin, String email) {
+        if(!tokenAdmin.equals("YW5hdG9seUBtYWlsLmNvbTpBbmF0b2x5MjAyMDIw"))
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Admin unauthorized");
+        User user = userRepository.findById(email).orElse(null);
+        if (user == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+        }
+        List<Car> carsUser = carRepository.findCarsByOwnerEmail(email);
+        for (Car car:carsUser) {
+            carRepository.deleteById(car.getSerial_number());
+        }
+        userRepository.delete(user);
+    }
 
     @GetMapping(value = "/find_counts_users_and_cars")
     public String[] findCounts() {
@@ -182,11 +189,15 @@ public class UserController {
         return map;
     }
 
-//    @DeleteMapping("/delHistory")
-//    public void delHistory(String email) {
-//        User user = userRepository.findById(email).orElse(null);
-//        assert user != null;
-//        user.setHistory(new ArrayList<>());
-//        userRepository.save(user);
-//    }
+    @DeleteMapping("/delHistory")
+    public void delHistory(@RequestHeader("Authorization") String tokenAdmin, String email) {
+        if(!tokenAdmin.equals("YW5hdG9seUBtYWlsLmNvbTpBbmF0b2x5MjAyMDIw"))
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Admin unauthorized");
+        User user = userRepository.findById(email).orElse(null);
+        if (user == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+        }
+        user.setHistory(new ArrayList<>());
+        userRepository.save(user);
+    }
 }
