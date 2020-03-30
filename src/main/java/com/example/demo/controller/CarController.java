@@ -33,18 +33,25 @@ public class CarController {
     }
 
 
+    @GetMapping("find_owner_by_car")
+    public String findOwnerByCar(@RequestParam String serial_number) {
+        Car car = carRepository.findById(serial_number).orElse(null);
+        if (car == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "Car with SN: " + serial_number + " not found");
+        User owner = userRepository.findById(car.getOwner().getEmail()).orElse(null);
+        if(owner == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Owner not found");
+        return "Car: " + serial_number + " (" + car.getModel() + ") -> " + owner.getEmail() + " (" + owner.getFirstName() + ")";
+    }
+
     @GetMapping
-    public TreeMap<String, List<String>> findOwners() {
-        List<User> users = userRepository.findAll();
+    public TreeMap<String, String> findOwners() {
         List<Car> cars = carRepository.findAll();
-        for (User user : users) {
-            List<String> numbers = new ArrayList<>();
-            List<Car> ownerCars = cars.stream().filter(car -> car.getOwner().getEmail()
-                    .equals(user.getEmail())).collect(Collectors.toList());
-            ownerCars.forEach(car -> numbers.add(car.getSerial_number()));
-            map.put(user.getEmail(), numbers);
+        for (Car car : cars) {
+            String serial_number = car.getSerial_number() + " (" + car.getModel() + ") ---> ";
+            String owner = car.getOwner().getEmail();
+            carMap.put(serial_number, owner);
         }
-        return map;
+        return carMap;
     }
 
     @GetMapping(value = "/geo/all/")
