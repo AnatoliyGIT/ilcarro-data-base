@@ -211,6 +211,34 @@ public class CarController {
         return str + " -> " + car.getStatistics().getRating().toString();
     }
 
+    @DeleteMapping("delete_bookedPeriod_by_bookedId_User")
+    public void delBookedPeriod(@RequestHeader String tokenAdmin, @RequestParam String email,
+                                @RequestParam String bookedId, @RequestParam String serial_number) {
+        if(!tokenAdmin.equals("YW5hdG9seUBtYWlsLmNvbTpBbmF0b2x5MjAyMDIw"))
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Admin unauthorized");
+        User user = userRepository.findById(email).orElse(null);
+        if (user == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+        }
+        ArrayList<Car> cars = user.getOwnerCars();
+        Car car = cars.stream().filter(c -> c.getSerial_number()
+                .equals(serial_number)).findFirst().orElse(null);
+        if (car == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Car not found");
+        }
+        ArrayList<BookedPeriod> bookedPeriodList = car.getBooked_periods();
+        BookedPeriod bookedPeriod = bookedPeriodList.stream().filter(per -> per.getOrder_id().equals(bookedId))
+                .findFirst().orElse(null);
+        if (bookedPeriod == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "BookedPeriod not found");
+        }
+        bookedPeriodList.removeIf(per -> per.getOrder_id().equals(bookedId));
+        car.setBooked_periods(bookedPeriodList);
+        cars.removeIf(c -> c.getSerial_number().equals(serial_number));
+        cars.add(car);
+        user.setOwnerCars(cars);
+        userRepository.save(user);
+    }
 
     @GetMapping(value = "/tree_cars/")
     public List<Car> findTreePopularCars() {
