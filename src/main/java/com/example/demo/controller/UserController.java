@@ -19,8 +19,7 @@ public class UserController {
 
     UserRepository userRepository;
     CarRepository carRepository;
-    TreeMap<String, String> map = new TreeMap<>();
-    TreeMap<Integer, String> map2 = new TreeMap<>();
+    TreeMap<Integer, String> map = new TreeMap<>();
 
     @Autowired
     public UserController(UserRepository userRepository, CarRepository carRepository) {
@@ -42,9 +41,9 @@ public class UserController {
             str = email + ":" + str;
             String token = Base64.encode(str.getBytes());
             count++;
-            map2.put(count, "(" + user.getRegistrationDate() + ") " + email + "                    " + token);
+            map.put(count, "(" + user.getRegistrationDate() + ") " + email + "                    " + token);
         }
-        return map2;
+        return map;
     }
 
     @GetMapping(value = "/find_passwords/")
@@ -59,9 +58,9 @@ public class UserController {
             byte[] base = Base64.decode(password);
             String str = new String(base);
             count++;
-            map2.put(count, "(" + user.getRegistrationDate() + ") " + email + "                    " + str);
+            map.put(count, "(" + user.getRegistrationDate() + ") " + email + "                    " + str);
         }
-        return map2;
+        return map;
     }
 
     @DeleteMapping(value = "/delete_all_lists_from_user/")
@@ -122,8 +121,13 @@ public class UserController {
             if (user.isActive()) {
                 List<String> list = new ArrayList<>();
                 for (History history : user.getHistory()) {
-                    list.add(history.getHistory().getOrder_id()
-                            + " - " + history.getHistory().getPerson_who_booked().getFirst_name());
+                    list.add("Car: " + history.getSerial_number()
+                            + " - /" + history.getHistory().getPerson_who_booked().getFirst_name()
+                            + "/ (" + history.getHistory().getStart_date_time().toLocalDate() + " "
+                            + history.getHistory().getStart_date_time().toLocalTime() + "..."
+                            + history.getHistory().getEnd_date_time().toLocalDate() + " "
+                            + history.getHistory().getEnd_date_time().toLocalTime()
+                            + ") -> " + history.getHistory().getAmount() + " $");
                 }
                 mapResponse.put(user.getEmail(), list);
             }
