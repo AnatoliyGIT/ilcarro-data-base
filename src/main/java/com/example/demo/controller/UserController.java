@@ -43,7 +43,7 @@ public class UserController {
             String strS = "";
             StringBuilder strSpace = new StringBuilder();
             for (int i = 0; i < symbolsCounts-user.getEmail().length(); i++) {
-                strSpace.append(" ");
+                strSpace.append("-");
             }
             String email = user.getEmail();
             String password = user.getPassword();
@@ -55,8 +55,8 @@ public class UserController {
             if (count < 10) {
                 strS = " ";
             }
-            map.put(count, strS + "(" + user.getRegistrationDate() + ") " + email
-                    + strSpace + token);
+            map.put(count, strS + " (" + user.getRegistrationDate() + ") " + email
+                    + " " + strSpace + " " + token);
         }
         return map;
     }
@@ -76,7 +76,7 @@ public class UserController {
             String strS = "";
             StringBuilder strSpace = new StringBuilder();
             for (int i = 0; i < symbolsCounts-user.getEmail().length(); i++) {
-                strSpace.append(" ");
+                strSpace.append("-");
             }
             String email = user.getEmail();
             String password = user.getPassword();
@@ -86,7 +86,7 @@ public class UserController {
             if (count < 10) {
                 strS = " ";
             }
-            map.put(count, strS + "(" + user.getRegistrationDate() + ") " + email + strSpace + str);
+            map.put(count, strS + "(" + user.getRegistrationDate() + ") " + email + " " + strSpace + " " + str);
         }
         return map;
     }

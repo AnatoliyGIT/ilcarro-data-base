@@ -1,7 +1,7 @@
 package com.example.demo.controller;
 
 import com.example.demo.documents.*;
-import com.example.demo.repository.CarComparatorBookedPeriod;
+import com.example.demo.CarComparatorBookedPeriod;
 import com.example.demo.repository.CarRepository;
 import com.example.demo.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,9 +12,9 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.TreeMap;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/car")
@@ -23,7 +23,6 @@ public class CarController {
 
     CarRepository carRepository;
     UserRepository userRepository;
-    TreeMap<String, List<String>> map = new TreeMap<>();
     TreeMap<String, String> carMap = new TreeMap<>();
 
     @Autowired
@@ -37,17 +36,37 @@ public class CarController {
     public String findOwnerByCar(@RequestParam String serial_number) {
         Car car = carRepository.findById(serial_number).orElse(null);
         if (car == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                    "Car with SN: " + serial_number + " not found");
+                "Car with SN: " + serial_number + " not found");
         User owner = userRepository.findById(car.getOwner().getEmail()).orElse(null);
-        if(owner == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Owner not found");
-        return "Car: " + serial_number + " (" + car.getModel() + ") -> " + owner.getEmail() + " (" + owner.getFirstName() + ")";
+        if (owner == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Owner not found");
+        return "Car: " + serial_number + " (" + car.getMake() + " " + car.getModel()
+                + ") Owner: " + owner.getEmail() + " (" + owner.getFirstName() + ")";
     }
 
     @GetMapping
     public TreeMap<String, String> findOwners() {
         List<Car> cars = carRepository.findAll();
+        List<String> numbers = new ArrayList<>();
+        List<String> models = new ArrayList<>();
         for (Car car : cars) {
-            String serial_number = car.getSerial_number() + " (" + car.getModel() + ") ---> ";
+            numbers.add(car.getSerial_number());
+            models.add(car.getMake() + " " + car.getModel());
+        }
+        numbers.sort(comparator);
+        models.sort(comparator);
+        int numbersCounts = numbers.get(numbers.size() - 1).length() + 1;
+        int modelsCounts = models.get(models.size() - 1).length() + 3;
+        for (Car car : cars) {
+            StringBuilder str1 = new StringBuilder();
+            StringBuilder str2 = new StringBuilder();
+            for (int i = 0; i < numbersCounts - car.getSerial_number().length(); i++) {
+                str1.append(" ");
+            }
+            for (int i = 0; i < modelsCounts - car.getModel().length() - car.getMake().length(); i++) {
+                str2.append("-");
+            }
+            String serial_number = "(" + car.getSerial_number() +  ") " + str1
+                    + car.getMake() + " " + car.getModel() + " " + str2 + " ";
             String owner = car.getOwner().getEmail();
             carMap.put(serial_number, owner);
         }
@@ -57,29 +76,37 @@ public class CarController {
     @GetMapping(value = "/geo/all/")
     public TreeMap<String, String> findGeoCars() {
         List<Car> cars = carRepository.findAll();
+        List<String> numbers = new ArrayList<>();
+        List<String> models = new ArrayList<>();
         for (Car car : cars) {
-            String str = "                  ";
-            if (car.getMake().length() + car.getModel().length() >= 8) {
-                str = "            ";
+            numbers.add(car.getSerial_number());
+            models.add(car.getMake() + " " + car.getModel());
+        }
+        numbers.sort(comparator);
+        models.sort(comparator);
+        int numbersCounts = numbers.get(numbers.size() - 1).length() + 3;
+        int modelsCounts = models.get(models.size() - 1).length() + 3;
+        for (Car car : cars) {
+            StringBuilder str1 = new StringBuilder();
+            StringBuilder str2 = new StringBuilder();
+            for (int i = 0; i < numbersCounts - car.getSerial_number().length(); i++) {
+                str1.append(" ");
             }
-            if (car.getMake().length() + car.getModel().length() >= 12) {
-                str = "        ";
+            for (int i = 0; i < modelsCounts - car.getModel().length() - car.getMake().length(); i++) {
+                str2.append("-");
             }
-            if (car.getMake().length() + car.getModel().length() >= 15) {
-                str = "     ";
-            }
-            String carNumber = car.getSerial_number()
-                    + " (" + car.getMake() + " " + car.getModel() + ")";
-            carMap.put(carNumber, str + car.getPick_up_place().getGeolocation());
+            String carNumber = car.getSerial_number() + str1
+                    + car.getMake() + " " + car.getModel();
+            carMap.put(carNumber, " " + str2 + " " + car.getPick_up_place().getGeolocation().toString());
         }
         return carMap;
     }
 
     @GetMapping(value = "/booked_pay/")
-    public TreeMap<String, String> findBookedCar(@RequestParam String serial_number) {
+    public TreeMap<String, String> findBookedPay(@RequestParam String serial_number) {
         Car car = carRepository.findById(serial_number).orElse(null);
         List<User> users = userRepository.findAll();
-        if (car == null) throw new NullPointerException("note found");
+        if (car == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Car note found");
         TreeMap<String, BookedPeriod> idBooked = new TreeMap<>();
         TreeMap<String, String> mapUser = new TreeMap<>();
         TreeMap<String, String> mapResponse = new TreeMap<>();
@@ -98,10 +125,14 @@ public class CarController {
                 if (key.equals(keyB)) {
                     String start_date_time = idBooked.get(key).getStart_date_time()
                             .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
-                    mapResponse.put(start_date_time, mapUser.get(keyB));
+                    String end_date_time = idBooked.get(key).getEnd_date_time()
+                            .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+                    mapResponse.put(start_date_time + " - " + end_date_time, mapUser.get(keyB));
                 }
             }
         }
+        if(mapResponse.isEmpty())
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Booked periods not founds");
         return mapResponse;
     }
 
@@ -113,16 +144,16 @@ public class CarController {
             List<String> list = new ArrayList<>();
             for (BookedPeriod bookedPeriod : car.getBooked_periods()) {
                 List<User> usersCar = new ArrayList<>();
-                for (User user:users) {
-                    for (BookedCars bookedCars:user.getBookedCars()) {
+                for (User user : users) {
+                    for (BookedCars bookedCars : user.getBookedCars()) {
                         if (bookedCars.getSerial_number().equals(car.getSerial_number())) {
                             usersCar.add(user);
                         }
                     }
                 }
                 User userCar = null;
-                for (User user:usersCar) {
-                    for (BookedCars bookedCars: user.getBookedCars()) {
+                for (User user : usersCar) {
+                    for (BookedCars bookedCars : user.getBookedCars()) {
                         if (bookedCars.getBooked_period().getOrder_id().equals(bookedPeriod.getOrder_id())) {
                             userCar = user;
                             break;
@@ -172,7 +203,7 @@ public class CarController {
     @GetMapping("/getCar/")
     public Car getCar(@RequestParam String serial_number) {
         Car car = carRepository.findById(serial_number).orElse(null);
-        if(car == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Car not found");
+        if (car == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Car not found");
         return car;
     }
 
@@ -181,8 +212,18 @@ public class CarController {
         List<Car> list = carRepository.findAll();
         list.sort(new CarComparatorBookedPeriod());
         List<String> stringList = new ArrayList<>();
-        for (Car car:list) {
-            stringList.add(car.getSerial_number() + " -> bookeds: " + car.getBooked_periods().size()
+        List<String> numbers = new ArrayList<>();
+        for (Car car : list) {
+            numbers.add(car.getSerial_number());
+        }
+        numbers.sort(comparator);
+        int numbersCounts = numbers.get(numbers.size() - 1).length() + 3;
+        for (Car car : list) {
+            StringBuilder str = new StringBuilder();
+            for (int i = 0; i < numbersCounts - car.getSerial_number().length(); i++) {
+                str.append("-");
+            }
+            stringList.add(car.getSerial_number() + " " + str + " bookeds: " + car.getBooked_periods().size()
                     + "; trips: " + car.getStatistics().getTrips());
         }
         return stringList;
@@ -190,19 +231,19 @@ public class CarController {
 
     @DeleteMapping("/del_trips_by_car")
     public String delTrips(@RequestHeader("Authorization") String tokenAdmin, @RequestParam String serial_number) {
-        if(!tokenAdmin.equals("YW5hdG9seUBtYWlsLmNvbTpBbmF0b2x5MjAyMDIw"))
+        if (!tokenAdmin.equals("YW5hdG9seUBtYWlsLmNvbTpBbmF0b2x5MjAyMDIw"))
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Admin unauthorized");
         String str;
         Car car = carRepository.findById(serial_number).orElse(null);
-        if(car == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Car not found");
+        if (car == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Car not found");
         str = car.getStatistics().getRating().toString();
         car.getStatistics().setTrips(0);
         User owner = userRepository.findById(car.getOwner().getEmail()).orElse(null);
-        if(owner == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+        if (owner == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND,
                 "Owner " + car.getOwner().getEmail() + " not found");
         Car carOwner = owner.getOwnerCars().stream().filter(c -> c.getSerial_number()
                 .equals(car.getSerial_number())).findFirst().orElse(null);
-        if(carOwner == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Car not found");
+        if (carOwner == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Car not found");
         carOwner.getStatistics().setTrips(0);
         owner.getOwnerCars().removeIf(c -> c.getSerial_number().equals(car.getSerial_number()));
         owner.getOwnerCars().add(carOwner);
@@ -214,7 +255,7 @@ public class CarController {
     @DeleteMapping("delete_bookedPeriod_by_bookedId_User")
     public void delBookedPeriod(@RequestHeader String tokenAdmin, @RequestParam String email,
                                 @RequestParam String bookedId, @RequestParam String serial_number) {
-        if(!tokenAdmin.equals("YW5hdG9seUBtYWlsLmNvbTpBbmF0b2x5MjAyMDIw"))
+        if (!tokenAdmin.equals("YW5hdG9seUBtYWlsLmNvbTpBbmF0b2x5MjAyMDIw"))
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Admin unauthorized");
         User user = userRepository.findById(email).orElse(null);
         if (user == null) {
@@ -249,11 +290,21 @@ public class CarController {
     public List<String> findTimesForCar() {
         List<Car> cars = carRepository.findAll();
         List<String> list = new ArrayList<>();
-        for (Car car:cars) {
-            list.add(car.getSerial_number() + " -> " + LocalDateTime.now()
+        List<String> numbers = new ArrayList<>();
+        for (Car car : cars) {
+            numbers.add(car.getSerial_number());
+        }
+        numbers.sort(comparator);
+        int numbersCounts = numbers.get(numbers.size() - 1).length() + 3;
+        for (Car car : cars) {
+            StringBuilder str = new StringBuilder();
+            for (int i = 0; i < numbersCounts - car.getSerial_number().length(); i++) {
+                str.append("-");
+            }
+            list.add(car.getSerial_number() + " " + str + " " + LocalDateTime.now()
                     .plusHours(correctionTimeZone(car.getPick_up_place()
-                            .getGeolocation().getLongitude())).format(DateTimeFormatter
-                            .ofPattern("dd.MM.yyyy HH:mm")));
+                            .getGeolocation().getLongitude()) + 1).format(DateTimeFormatter
+                            .ofPattern("HH:mm dd.MM.yyyy")));
         }
         return list;
     }
@@ -261,10 +312,10 @@ public class CarController {
     @DeleteMapping(value = "delete_period_false")
     public void deletePeriodFalse(@RequestHeader("Authorization") String tokenAdmin
             , @RequestParam String serial_number_auto, @RequestParam String bookedId) {
-        if(!tokenAdmin.equals("YW5hdG9seUBtYWlsLmNvbTpBbmF0b2x5MjAyMDIw"))
+        if (!tokenAdmin.equals("YW5hdG9seUBtYWlsLmNvbTpBbmF0b2x5MjAyMDIw"))
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Admin unauthorized");
         Car car = carRepository.findById(serial_number_auto).orElse(null);
-        if(car == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Car not found");
+        if (car == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Car not found");
         ArrayList<BookedPeriod> bookedPeriodList = car.getBooked_periods();
         bookedPeriodList.removeIf(bookedPeriod -> bookedPeriod.getOrder_id().equals(bookedId));
         car.setBooked_periods(bookedPeriodList);
@@ -275,7 +326,7 @@ public class CarController {
     @GetMapping(value = "find_booked_periods")
     public List<BookedPeriod> findBookedPeriods(@RequestParam String serial_number) {
         Car car = carRepository.findById(serial_number).orElse(null);
-        if(car == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Car not found");
+        if (car == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Car not found");
         return car.getBooked_periods();
     }
 
@@ -283,4 +334,6 @@ public class CarController {
         int longitude = (int) Math.floor(l);
         return Math.floorDiv(longitude, 15);
     }
+
+    Comparator<String> comparator = Comparator.comparingInt(String::length);
 }
