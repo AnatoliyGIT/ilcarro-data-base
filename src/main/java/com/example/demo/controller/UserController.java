@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.TreeMap;
 
@@ -32,8 +33,14 @@ public class UserController {
         if (!tokenAdmin.equals("YW5hdG9seUBtYWlsLmNvbTpBbmF0b2x5MjAyMDIw"))
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Admin unauthorized");
         List<User> users = userRepository.findAll();
+        users.sort(emailComparator);
+        List<String> emails = new ArrayList<>();
+        users.forEach(email -> emails.add(email.getEmail()));
+        emails.sort(lengthComparator);
+        int symbolsCounts = emails.get(emails.size() - 1).length() + 3;
         int count = 0;
         for (User user : users) {
+            String strS = "";
             String email = user.getEmail();
             String password = user.getPassword();
             byte[] base = Base64.decode(password);
@@ -41,7 +48,11 @@ public class UserController {
             str = email + ":" + str;
             String token = Base64.encode(str.getBytes());
             count++;
-            map.put(count, "(" + user.getRegistrationDate() + ") " + email + "                    " + token);
+            if (count < 10) {
+                strS = " ";
+            }
+            map.put(count, strS + "(" + user.getRegistrationDate() + ") " + email
+                    + " ".repeat(Math.max(0, symbolsCounts - user.getEmail().length())) + token);
         }
         return map;
     }
@@ -51,14 +62,24 @@ public class UserController {
         if (!tokenAdmin.equals("YW5hdG9seUBtYWlsLmNvbTpBbmF0b2x5MjAyMDIw"))
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Admin unauthorized");
         List<User> users = userRepository.findAll();
+        users.sort(emailComparator);
+        List<String> emails = new ArrayList<>();
+        users.forEach(email -> emails.add(email.getEmail()));
+        emails.sort(lengthComparator);
+        int symbolsCounts = emails.get(emails.size() - 1).length() + 3;
         int count = 0;
         for (User user : users) {
+            String strS = "";
             String email = user.getEmail();
             String password = user.getPassword();
             byte[] base = Base64.decode(password);
             String str = new String(base);
             count++;
-            map.put(count, "(" + user.getRegistrationDate() + ") " + email + "                    " + str);
+            if (count < 10) {
+                strS = " ";
+            }
+            map.put(count, strS + "(" + user.getRegistrationDate() + ") " + email
+                    + " ".repeat(Math.max(0, symbolsCounts - user.getEmail().length())) + str);
         }
         return map;
     }
@@ -221,4 +242,7 @@ public class UserController {
         user.setActive(true);
         userRepository.save(user);
     }
+
+    Comparator<String> lengthComparator = Comparator.comparingInt(String::length);
+    Comparator<User> emailComparator = Comparator.comparing(User::getEmail);
 }
