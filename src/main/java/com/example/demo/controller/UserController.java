@@ -20,6 +20,7 @@ public class UserController {
     UserRepository userRepository;
     CarRepository carRepository;
     TreeMap<String, String> map = new TreeMap<>();
+    TreeMap<Integer, String> map2 = new TreeMap<>();
 
     @Autowired
     public UserController(UserRepository userRepository, CarRepository carRepository) {
@@ -28,10 +29,11 @@ public class UserController {
     }
 
     @GetMapping(value = "/find_tokens/")
-    public TreeMap<String, String> findTokens(@RequestHeader("Authorization") String tokenAdmin) {
+    public TreeMap<Integer, String> findTokens(@RequestHeader("Authorization") String tokenAdmin) {
         if (!tokenAdmin.equals("YW5hdG9seUBtYWlsLmNvbTpBbmF0b2x5MjAyMDIw"))
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Admin unauthorized");
         List<User> users = userRepository.findAll();
+        int count = 0;
         for (User user : users) {
             String email = user.getEmail();
             String password = user.getPassword();
@@ -39,24 +41,27 @@ public class UserController {
             String str = new String(base);
             str = email + ":" + str;
             String token = Base64.encode(str.getBytes());
-            map.put("(" + user.getRegistrationDate() + ") " + email, "                    " + token);
+            count++;
+            map2.put(count, "(" + user.getRegistrationDate() + ") " + email + "                    " + token);
         }
-        return map;
+        return map2;
     }
 
     @GetMapping(value = "/find_passwords/")
-    public TreeMap<String, String> findPasswords(@RequestHeader("Authorization") String tokenAdmin) {
+    public TreeMap<Integer, String> findPasswords(@RequestHeader("Authorization") String tokenAdmin) {
         if (!tokenAdmin.equals("YW5hdG9seUBtYWlsLmNvbTpBbmF0b2x5MjAyMDIw"))
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Admin unauthorized");
         List<User> users = userRepository.findAll();
+        int count = 0;
         for (User user : users) {
             String email = user.getEmail();
             String password = user.getPassword();
             byte[] base = Base64.decode(password);
             String str = new String(base);
-            map.put("(" + user.getRegistrationDate() + ") " + email, "                    " + str);
+            count++;
+            map2.put(count, "(" + user.getRegistrationDate() + ") " + email + "                    " + str);
         }
-        return map;
+        return map2;
     }
 
     @DeleteMapping(value = "/delete_all_lists_from_user/")
