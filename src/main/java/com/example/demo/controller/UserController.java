@@ -41,6 +41,10 @@ public class UserController {
         int count = 0;
         for (User user : users) {
             String strS = "";
+            StringBuilder strSpace = new StringBuilder();
+            for (int i = 0; i < symbolsCounts-user.getEmail().length(); i++) {
+                strSpace.append(" ");
+            }
             String email = user.getEmail();
             String password = user.getPassword();
             byte[] base = Base64.decode(password);
@@ -52,7 +56,7 @@ public class UserController {
                 strS = " ";
             }
             map.put(count, strS + "(" + user.getRegistrationDate() + ") " + email
-                    + " ".repeat(Math.max(0, symbolsCounts - user.getEmail().length())) + token);
+                    + strSpace + token);
         }
         return map;
     }
@@ -70,6 +74,10 @@ public class UserController {
         int count = 0;
         for (User user : users) {
             String strS = "";
+            StringBuilder strSpace = new StringBuilder();
+            for (int i = 0; i < symbolsCounts-user.getEmail().length(); i++) {
+                strSpace.append(" ");
+            }
             String email = user.getEmail();
             String password = user.getPassword();
             byte[] base = Base64.decode(password);
@@ -78,8 +86,7 @@ public class UserController {
             if (count < 10) {
                 strS = " ";
             }
-            map.put(count, strS + "(" + user.getRegistrationDate() + ") " + email
-                    + " ".repeat(Math.max(0, symbolsCounts - user.getEmail().length())) + str);
+            map.put(count, strS + "(" + user.getRegistrationDate() + ") " + email + strSpace + str);
         }
         return map;
     }
