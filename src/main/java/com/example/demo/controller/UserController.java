@@ -95,10 +95,8 @@ public class UserController {
     public void deleteAllLists(@RequestHeader("Authorization") String tokenAdmin, String email) {
         if (!tokenAdmin.equals("YW5hdG9seUBtYWlsLmNvbTpBbmF0b2x5MjAyMDIw"))
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Admin unauthorized");
-        User user = userRepository.findById(email).orElse(null);
-        if (user == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User Not Found");
-        }
+        User user = userRepository.findById(email)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User Not Found"));
         user.setComments(new ArrayList<>());
         user.setHistory(new ArrayList<>());
         user.setBookedCars(new ArrayList<>());
@@ -109,7 +107,8 @@ public class UserController {
                     .rating(0)
                     .trips(0)
                     .build());
-            Car carFromRepository = carRepository.findById(car.getSerial_number()).orElse(null);
+            Car carFromRepository = carRepository.findById(car.getSerial_number())
+                    .orElse(null);
             if (carFromRepository == null) {
                 cars.remove(car);
                 continue;
@@ -178,14 +177,10 @@ public class UserController {
     public void deleteUserByEmail(@RequestHeader("Authorization") String tokenAdmin, String email) {
         if (!tokenAdmin.equals("YW5hdG9seUBtYWlsLmNvbTpBbmF0b2x5MjAyMDIw"))
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Admin unauthorized");
-        User user = userRepository.findById(email).orElse(null);
-        if (user == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
-        }
+        User user = userRepository.findById(email)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
         List<Car> carsUser = carRepository.findCarsByOwnerEmail(email);
-        for (Car car : carsUser) {
-            carRepository.deleteById(car.getSerial_number());
-        }
+        carRepository.deleteAll(carsUser);
         userRepository.delete(user);
     }
 
@@ -230,10 +225,8 @@ public class UserController {
     public void delHistory(@RequestHeader("Authorization") String tokenAdmin, String email) {
         if (!tokenAdmin.equals("YW5hdG9seUBtYWlsLmNvbTpBbmF0b2x5MjAyMDIw"))
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Admin unauthorized");
-        User user = userRepository.findById(email).orElse(null);
-        if (user == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
-        }
+        User user = userRepository.findById(email)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
         user.setHistory(new ArrayList<>());
         userRepository.save(user);
     }
@@ -242,10 +235,8 @@ public class UserController {
     public void activateUser(@RequestHeader("Authorization") String tokenAdmin, @RequestParam String email) {
         if (!tokenAdmin.equals("YW5hdG9seUBtYWlsLmNvbTpBbmF0b2x5MjAyMDIw"))
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Admin unauthorized");
-        User user = userRepository.findById(email).orElse(null);
-        if (user == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
-        }
+        User user = userRepository.findById(email)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
         user.setActive(true);
         userRepository.save(user);
     }
