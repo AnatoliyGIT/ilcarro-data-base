@@ -23,7 +23,6 @@ public class CarController {
 
     CarRepository carRepository;
     UserRepository userRepository;
-    TreeMap<String, String> carMap = new TreeMap<>();
 
     @Autowired
     public CarController(CarRepository carRepository, UserRepository userRepository) {
@@ -45,6 +44,7 @@ public class CarController {
 
     @GetMapping
     public TreeMap<String, String> findOwners() {
+        TreeMap<String, String> carMap = new TreeMap<>();
         List<Car> cars = carRepository.findAll();
         List<String> numbers = new ArrayList<>();
         List<String> models = new ArrayList<>();
@@ -75,6 +75,7 @@ public class CarController {
 
     @GetMapping(value = "/geo/all/")
     public TreeMap<String, String> findGeoCars() {
+        TreeMap<String, String> carMap = new TreeMap<>();
         List<Car> cars = carRepository.findAll();
         List<String> numbers = new ArrayList<>();
         List<String> models = new ArrayList<>();
