@@ -106,7 +106,7 @@ public class CarController {
     @GetMapping(value = "/booked_pay/")
     public TreeMap<String, String> findBookedPay(@RequestParam String serial_number) {
         Car car = carRepository.findById(serial_number)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Car note found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Car not found"));
         List<User> users = userRepository.findAll();
         TreeMap<String, BookedPeriod> idBooked = new TreeMap<>();
         TreeMap<String, String> mapUser = new TreeMap<>();
