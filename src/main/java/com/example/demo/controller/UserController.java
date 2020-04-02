@@ -241,6 +241,19 @@ public class UserController {
         userRepository.save(user);
     }
 
+    @PostMapping("change_password")
+    public void changePasswordUser(@RequestHeader("Authorization") String tokenAdmin
+            , @RequestParam String email, @RequestParam String newPassword) {
+        if (!tokenAdmin.equals("YW5hdG9seUBtYWlsLmNvbTpBbmF0b2x5MjAyMDIw"))
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Admin unauthorized");
+        byte[] bytes = newPassword.getBytes();
+        String newPasswordBase64 = Base64.encode(bytes);
+        User user = userRepository.findById(email)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        user.setPassword(newPasswordBase64);
+        userRepository.save(user);
+    }
+
     Comparator<String> lengthComparator = Comparator.comparingInt(String::length);
     Comparator<User> emailComparator = Comparator.comparing(User::getEmail);
 }
