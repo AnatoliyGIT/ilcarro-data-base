@@ -30,11 +30,11 @@ public class StatisticController {
         return usageStatistics.getObjectUserStatistics();
     }
 
-    @GetMapping("get_general_statistics")
-    public TreeMap<String, List<String>> getGeneralStatistics() throws IllegalAccessException {
-        List<ObjectGeneralStatistics> objectGeneralStatisticsList = new ArrayList<>();//лист общей статистики
-        List<ObjectUserStatistics> objectUserStatisticsList = new ArrayList<>();//лист для статистики юзера
-        TreeMap<String, List<String>> mapList = new TreeMap<>();//мап(email, map(field,value)) для вывода
+    @GetMapping("get_all_statistics")
+    public TreeMap<String, List<String>> getAllStatistics() throws IllegalAccessException {
+        List<ObjectGeneralStatistics> objectGeneralStatisticsList = new ArrayList<>();
+        List<ObjectUserStatistics> objectUserStatisticsList = new ArrayList<>();
+        TreeMap<String, List<String>> mapList = new TreeMap<>();
         List<UsageStatistics> statisticsList = repository.findAll();
 
         for (UsageStatistics usageStatistics : statisticsList) {
@@ -47,14 +47,18 @@ public class StatisticController {
             if (usageStatistics.getEmail().equals("General")) {
                 for (ObjectGeneralStatistics objectGeneralStatistics : objectGeneralStatisticsList) {
                     List<String> list = new ArrayList<>();
-                    TreeMap<String, Integer> generalMap = new TreeMap<>();//мап для данных
+                    TreeMap<String, Integer> generalMap = new TreeMap<>();
                     Field[] generalFields = objectGeneralStatistics.getClass().getDeclaredFields();
                     for (Field field : generalFields) {
                         field.setAccessible(true);
                         generalMap.put(field.getName(), field.getInt(objectGeneralStatistics));
                         field.setAccessible(false);
+                        StringBuilder str = new StringBuilder();
+                        for (int i = field.getName().length(); i < 32; i++) {
+                            str.append("-");
+                        }
                         if (generalMap.get(field.getName()) != 0) {
-                            list.add(generalMap.firstKey() + ": " + generalMap.get(field.getName()));
+                            list.add(generalMap.firstKey() + " " + str + " " + generalMap.get(field.getName()));
                         }
                         generalMap.remove(field.getName());
                     }
@@ -70,8 +74,12 @@ public class StatisticController {
                     field.setAccessible(true);
                     userMap.put(field.getName(), field.getInt(objectUserStatistics));
                     field.setAccessible(false);
+                    StringBuilder str = new StringBuilder();
+                    for (int i = field.getName().length(); i < 32; i++) {
+                        str.append("-");
+                    }
                     if (userMap.get(field.getName()) != 0) {
-                        list.add(userMap.firstKey() + " " + userMap.get(field.getName()));
+                        list.add(userMap.firstKey() + " " + str + " " + userMap.get(field.getName()));
                     }
                     userMap.remove(field.getName());
                 }
