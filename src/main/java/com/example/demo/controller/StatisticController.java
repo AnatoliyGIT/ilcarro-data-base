@@ -9,10 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.TreeMap;
-import java.util.function.ObjDoubleConsumer;
+import java.lang.reflect.Field;
+import java.util.*;
 
 @RestController
 @RequestMapping("/statistics")
@@ -32,25 +30,55 @@ public class StatisticController {
         return usageStatistics.getObjectUserStatistics();
     }
 
-    @GetMapping("get_all_statistics")
-    public HashMap<String, ObjectUserStatistics> getAllStatistics() {
-        List<UsageStatistics> usageStatisticsList = repository.findAll();
-        HashMap<String, ObjectUserStatistics> map = new HashMap<>();
-        for (UsageStatistics usageStatistics : usageStatisticsList) {
-            if (!usageStatistics.getEmail().equals("General")) {
-                map.put(usageStatistics.getEmail(), usageStatistics.getObjectUserStatistics());
+    @GetMapping("get_general_statistics")
+    public TreeMap<String, List<String>> getGeneralStatistics() throws IllegalAccessException {
+        List<ObjectGeneralStatistics> objectGeneralStatisticsList = new ArrayList<>();//лист общей статистики
+        List<ObjectUserStatistics> objectUserStatisticsList = new ArrayList<>();//лист для статистики юзера
+        TreeMap<String, List<String>> mapList = new TreeMap<>();//мап(email, map(field,value)) для вывода
+        List<UsageStatistics> statisticsList = repository.findAll();
+
+        for (UsageStatistics usageStatistics : statisticsList) {
+            if (objectGeneralStatisticsList.isEmpty() && usageStatistics.getObjectGeneralStatistics() != null) {
+                objectGeneralStatisticsList.add(usageStatistics.getObjectGeneralStatistics());
+            }
+            if (usageStatistics.getObjectUserStatistics() != null) {
+                objectUserStatisticsList.add(usageStatistics.getObjectUserStatistics());
+            }
+            if (usageStatistics.getEmail().equals("General")) {
+                for (ObjectGeneralStatistics objectGeneralStatistics : objectGeneralStatisticsList) {
+                    List<String> list = new ArrayList<>();
+                    TreeMap<String, Integer> generalMap = new TreeMap<>();//мап для данных
+                    Field[] generalFields = objectGeneralStatistics.getClass().getDeclaredFields();
+                    for (Field field : generalFields) {
+                        field.setAccessible(true);
+                        generalMap.put(field.getName(), field.getInt(objectGeneralStatistics));
+                        field.setAccessible(false);
+                        if (generalMap.get(field.getName()) != 0) {
+                            list.add(generalMap.firstKey() + ": " + generalMap.get(field.getName()));
+                        }
+                        generalMap.remove(field.getName());
+                    }
+                    mapList.put(usageStatistics.getEmail(), list);
+                }
+            }
+
+            for (ObjectUserStatistics objectUserStatistics : objectUserStatisticsList) {
+                List<String> list = new ArrayList<>();
+                TreeMap<String, Integer> userMap = new TreeMap<>();//мап для данных
+                Field[] userFields = objectUserStatistics.getClass().getDeclaredFields();
+                for (Field field : userFields) {
+                    field.setAccessible(true);
+                    userMap.put(field.getName(), field.getInt(objectUserStatistics));
+                    field.setAccessible(false);
+                    if (userMap.get(field.getName()) != 0) {
+                        list.add(userMap.firstKey() + " " + userMap.get(field.getName()));
+                    }
+                    userMap.remove(field.getName());
+                }
+                mapList.put(usageStatistics.getEmail(), list);
             }
         }
-        return map;
-    }
-
-    @GetMapping("get_general_statistics")
-    public HashMap<String, ObjectGeneralStatistics> getGeneralStatistics() {
-        HashMap<String, ObjectGeneralStatistics> map = new HashMap<>();
-        UsageStatistics usageStatistics = repository.findById("General")
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "General statistics not founds"));
-        map.put(usageStatistics.getEmail(), usageStatistics.getObjectGeneralStatistics());
-        return map;
+        return mapList;
     }
 
 

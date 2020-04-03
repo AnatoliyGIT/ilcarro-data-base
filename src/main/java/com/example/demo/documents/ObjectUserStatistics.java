@@ -1,32 +1,29 @@
 package com.example.demo.documents;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-@Data
+@Getter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 public class ObjectUserStatistics {
-    private int addNewCar__________________ = 0;
-    private int updateCar__________________ = 0;
-    private int deleteCar__________________ = 0;
-    private int ownerGetCars_______________ = 0;
-    private int ownerGetCarBySerialNumber__ = 0;
+    private int addNewCar = 0;
+    private int updateCar = 0;
+    private int deleteCar = 0;
+    private int ownerGetCars = 0;
+    private int ownerGetCarBySerialNumber = 0;
     private int ownerGetBookedPeriodByCarId = 0;
-    private int addNewCommentByCarId_______ = 0;
-    private int paymentForReservation______ = 0;
-    private int makeReservation____________ = 0;
-    private int reservationCancellation____ = 0;
-    private int unlockCarForBookingCarId___ = 0;
-    private int lockCarForBookingCarId_____ = 0;
-    private int registrationUser___________ = 0;
-    private int updateUser_________________ = 0;
-    private int deleteUser_________________ = 0;
-    private int getBookedList______________ = 0;
-    private int getInvoice_________________ = 0;
-    private int authUser___________________ = 0;
-    private int getHistory_________________ = 0;
+    private int addNewCommentByCarId = 0;
+    private int paymentForReservation = 0;
+    private int makeReservation = 0;
+    private int reservationCancellation = 0;
+    private int unlockCarForBookingCarId = 0;
+    private int lockCarForBookingCarId = 0;
+    private int registrationUser = 0;
+    private int updateUser = 0;
+    private int deleteUser = 0;
+    private int getBookedList = 0;
+    private int getInvoice = 0;
+    private int authUser = 0;
+    private int getHistory = 0;
 }
