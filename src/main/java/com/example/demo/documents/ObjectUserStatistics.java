@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ObjectStatistics {
+public class ObjectUserStatistics {
     private int addNewCar__________________ = 0;
     private int updateCar__________________ = 0;
     private int deleteCar__________________ = 0;

@@ -11,5 +11,6 @@ import org.springframework.data.annotation.Id;
 public class UsageStatistics {
     @Id
     private String email;
-    private ObjectStatistics objectStatistics;
+    private ObjectUserStatistics objectUserStatistics;
+    private ObjectGeneralStatistics objectGeneralStatistics;
 }
