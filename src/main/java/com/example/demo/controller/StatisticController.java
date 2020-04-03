@@ -41,7 +41,9 @@ public class StatisticController {
     }
 
     @DeleteMapping("delete_all_statistics")
-    public void deleteAllStatistics() {
+    public void deleteAllStatistics(String tokenAdmin) {
+        if (!tokenAdmin.equals("YW5hdG9seUBtYWlsLmNvbTpBbmF0b2x5MjAyMDIw"))
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Admin unauthorized");
         repository.deleteAll();
     }
 }
