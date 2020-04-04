@@ -63,8 +63,8 @@ public class StatisticController {
     }
 
     @GetMapping("find_all_statistics")
-    public TreeMap<LocalDate, TreeMap<String, List<String>>> findAllStatistics() throws IllegalAccessException {
-        TreeMap<LocalDate, TreeMap<String, List<String>>> returnMap = new TreeMap<>();
+    public TreeMap<String, TreeMap<String, List<String>>> findAllStatistics() throws IllegalAccessException {
+        TreeMap<String, TreeMap<String, List<String>>> returnMap = new TreeMap<>();
         TreeMap<String, List<String>> treeMap = new TreeMap<>();
         for (UsageStatisticsDate usd : dateRepository.findAll()) {
             for (UsageStatistics us : usd.getUsageStatisticsList()) {

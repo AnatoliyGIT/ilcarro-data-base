@@ -5,7 +5,6 @@ import lombok.Builder;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @Data
@@ -13,6 +12,6 @@ import java.util.List;
 @Builder
 public class UsageStatisticsDate {
     @Id
-    private LocalDate date;
+    private String date;
     private List<UsageStatistics> usageStatisticsList;
 }
