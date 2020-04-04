@@ -88,7 +88,7 @@ public class StatisticController {
             , ObjectGeneralStatistics objectGeneralStatistics
             , ObjectUserStatistics objectUserStatistics) throws IllegalAccessException {
         List<String> list = new ArrayList<>();
-        TreeMap<String, Integer> generalMap = new TreeMap<>();
+        TreeMap<String, Integer> map = new TreeMap<>();
         Field[] fields = new Field[0];
         if (objectGeneralStatistics == null) {
             fields = objectUserStatistics.getClass().getDeclaredFields();
@@ -105,16 +105,16 @@ public class StatisticController {
             if (objectUserStatistics == null) {
                 value = field.getInt(objectGeneralStatistics);
             }
-            generalMap.put(field.getName(), value);
+            map.put(field.getName(), value);
             field.setAccessible(false);
             StringBuilder str = new StringBuilder();
             for (int i = field.getName().length(); i < 32; i++) {
                 str.append("-");
             }
-            if (generalMap.get(field.getName()) != 0) {
-                list.add(generalMap.firstKey() + " " + str + " " + generalMap.get(field.getName()));
+            if (map.get(field.getName()) != 0) {
+                list.add(map.firstKey() + " " + str + " " + map.get(field.getName()));
             }
-            generalMap.remove(field.getName());
+            map.remove(field.getName());
         }
         mapList.put(usageStatistics.getName(), list);
     }
