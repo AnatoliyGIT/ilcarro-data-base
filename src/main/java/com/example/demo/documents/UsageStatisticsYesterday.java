@@ -5,11 +5,13 @@ import lombok.Builder;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 
+import java.util.List;
+
 @Data
 @AllArgsConstructor
 @Builder
-public class UsageStatisticsDate {
+public class UsageStatisticsYesterday {
     @Id
     private String date;
-    private UsageStatisticsYesterday usageStatisticsYesterday;
+    private List<UsageStatistics> usageStatisticsList;
 }

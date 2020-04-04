@@ -1,9 +1,6 @@
 package com.example.demo.controller;
 
-import com.example.demo.documents.ObjectGeneralStatistics;
-import com.example.demo.documents.ObjectUserStatistics;
-import com.example.demo.documents.UsageStatistics;
-import com.example.demo.documents.UsageStatisticsDate;
+import com.example.demo.documents.*;
 import com.example.demo.repository.UsageStatisticsDateRepository;
 import com.example.demo.repository.UsageStatisticsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,12 +64,19 @@ public class StatisticController {
         TreeMap<String, TreeMap<String, List<String>>> returnMap = new TreeMap<>();
         TreeMap<String, List<String>> treeMap = new TreeMap<>();
         for (UsageStatisticsDate usd : dateRepository.findAll()) {
-            for (UsageStatistics us : usd.getUsageStatisticsList()) {
+            List<UsageStatistics> usageStatisticsList = new ArrayList<>(usd
+                    .getUsageStatisticsYesterday().getUsageStatisticsList());
+            for (UsageStatistics us : usageStatisticsList) {
                 serializerField(treeMap,us,us.getObjectGeneralStatistics(),us.getObjectUserStatistics());
             }
             returnMap.put(usd.getDate(), treeMap);
         }
         return returnMap;
+    }
+
+    @GetMapping("find_all")
+    public List<UsageStatisticsDate> findAll() throws IllegalAccessException {
+        return dateRepository.findAll();
     }
 
     @DeleteMapping("delete_all_statistics")
