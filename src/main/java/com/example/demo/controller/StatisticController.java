@@ -9,8 +9,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.lang.reflect.Field;
-import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.TreeMap;
 
 @RestController
 @RequestMapping("/statistics")
@@ -63,9 +64,8 @@ public class StatisticController {
     public TreeMap<String, TreeMap<String, List<String>>> findAllStatistics() throws IllegalAccessException {
         TreeMap<String, TreeMap<String, List<String>>> returnMap = new TreeMap<>();
         TreeMap<String, List<String>> treeMap = new TreeMap<>();
-        for (UsageStatisticsDate usd : dateRepository.findAll()) {
-            List<UsageStatistics> usageStatisticsList = new ArrayList<>(usd
-                    .getUsageStatisticsYesterday().getUsageStatisticsList());
+        for (UsageStatisticsYesterday usd : dateRepository.findAll()) {
+            List<UsageStatistics> usageStatisticsList = new ArrayList<>(usd.getUsageStatisticsList());
             for (UsageStatistics us : usageStatisticsList) {
                 serializerField(treeMap,us,us.getObjectGeneralStatistics(),us.getObjectUserStatistics());
             }
@@ -75,7 +75,7 @@ public class StatisticController {
     }
 
     @GetMapping("find_all")
-    public List<UsageStatisticsDate> findAll() throws IllegalAccessException {
+    public List<UsageStatisticsYesterday> findAll() {
         return dateRepository.findAll();
     }
 
