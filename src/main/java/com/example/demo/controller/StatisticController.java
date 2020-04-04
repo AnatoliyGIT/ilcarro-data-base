@@ -28,10 +28,13 @@ public class StatisticController {
     }
 
     @GetMapping("find_statistics_for_user")
-    public ObjectUserStatistics findStatisticsForUser(@RequestParam String email) {
+    public TreeMap<String, List<String>> findStatisticsForUser(@RequestParam String email) throws IllegalAccessException {
         UsageStatistics usageStatistics = statisticsRepository.findById(email).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Statistics not found"));
-        return usageStatistics.getObjectUserStatistics();
+        TreeMap<String, List<String>> mapList = new TreeMap<>();
+        serializerField(mapList,usageStatistics,usageStatistics.getObjectGeneralStatistics()
+                ,usageStatistics.getObjectUserStatistics());
+        return mapList;
     }
 
     @GetMapping("get_statistics_today")
@@ -72,11 +75,6 @@ public class StatisticController {
             returnMap.put(usd.getDate(), treeMap);
         }
         return returnMap;
-    }
-
-    @GetMapping("find_all")
-    public List<UsageStatisticsYesterday> findAll() {
-        return dateRepository.findAll();
     }
 
     @DeleteMapping("delete_all_statistics")
