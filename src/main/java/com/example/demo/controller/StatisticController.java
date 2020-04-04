@@ -80,6 +80,7 @@ public class StatisticController {
         if (!tokenAdmin.equals("YW5hdG9seUBtYWlsLmNvbTpBbmF0b2x5MjAyMDIw"))
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Admin unauthorized");
         statisticsRepository.deleteAll();
+        dateRepository.deleteAll();
     }
 
     private static void serializerField(TreeMap<String, List<String>> mapList
