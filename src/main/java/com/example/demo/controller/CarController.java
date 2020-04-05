@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/car")
@@ -74,9 +75,10 @@ public class CarController {
     }
 
     @GetMapping(value = "/geo/all/")
-    public TreeMap<String, String> findGeoCars() {
-        TreeMap<String, String> carMap = new TreeMap<>();
+    public List<String> findGeoCars() {
+        List<String> carList = new ArrayList<>();
         List<Car> cars = carRepository.findAll();
+        cars.sort(CarMakeComparator);
         List<String> numbers = new ArrayList<>();
         List<String> models = new ArrayList<>();
         for (Car car : cars) {
@@ -98,9 +100,9 @@ public class CarController {
             }
             String carNumber = car.getSerial_number() + str1
                     + car.getMake() + " " + car.getModel();
-            carMap.put(carNumber, " " + str2 + " " + car.getPick_up_place().getGeolocation().toString());
+            carList.add(carNumber + " " + str2 + " " + car.getPick_up_place().getGeolocation().toString());
         }
-        return carMap;
+        return carList;
     }
 
     @GetMapping(value = "/booked_pay/")
@@ -330,4 +332,5 @@ public class CarController {
     }
 
     Comparator<String> comparator = Comparator.comparingInt(String::length);
+    Comparator<Car> CarMakeComparator = Comparator.comparing(Car::getMake);
 }
