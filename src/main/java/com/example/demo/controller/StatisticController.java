@@ -66,8 +66,8 @@ public class StatisticController {
     @GetMapping("find_all_statistics")
     public TreeMap<String, TreeMap<String, List<String>>> findAllStatistics() throws IllegalAccessException {
         TreeMap<String, TreeMap<String, List<String>>> returnMap = new TreeMap<>();
-        TreeMap<String, List<String>> treeMap = new TreeMap<>();
         for (UsageStatisticsYesterday usd : dateRepository.findAll()) {
+            TreeMap<String, List<String>> treeMap = new TreeMap<>();
             List<UsageStatistics> usageStatisticsList = new ArrayList<>(usd.getUsageStatisticsList());
             for (UsageStatistics us : usageStatisticsList) {
                 serializerField(treeMap,us,us.getObjectGeneralStatistics(),us.getObjectUserStatistics());
@@ -84,6 +84,11 @@ public class StatisticController {
         statisticsRepository.deleteAll();
         dateRepository.deleteAll();
     }
+
+//    @GetMapping("findAll")
+//    public List<UsageStatisticsYesterday> findAllStat() {
+//        return dateRepository.findAll();
+//    }
 
     private static void serializerField(TreeMap<String, List<String>> mapList
             , UsageStatistics usageStatistics
