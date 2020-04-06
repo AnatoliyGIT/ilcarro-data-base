@@ -10,6 +10,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.TreeMap;
 
@@ -64,8 +65,8 @@ public class StatisticController {
     }
 
     @GetMapping("find_all_statistics")
-    public TreeMap<String, TreeMap<String, List<String>>> findAllStatistics() throws IllegalAccessException {
-        TreeMap<String, TreeMap<String, List<String>>> returnMap = new TreeMap<>();
+    public HashMap<String, TreeMap<String, List<String>>> findAllStatistics() throws IllegalAccessException {
+        HashMap<String, TreeMap<String, List<String>>> returnMap = new HashMap<>();
         for (UsageStatisticsYesterday usd : dateRepository.findAll()) {
             TreeMap<String, List<String>> treeMap = new TreeMap<>();
             List<UsageStatistics> usageStatisticsList = new ArrayList<>(usd.getUsageStatisticsList());
