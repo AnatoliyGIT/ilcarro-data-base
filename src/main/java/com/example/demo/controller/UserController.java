@@ -211,7 +211,8 @@ public class UserController {
             if (user.isActive()) {
                 for (Car car : user.getOwnerCars()) {
                     carRepository.findById(car.getSerial_number())
-                            .ifPresent(carFromRepo -> list.add(car.getSerial_number()));
+                            .ifPresent(carFromRepo -> list.add(car.getSerial_number()
+                                    + " -> " + car.getMake() + " " + car.getModel()));
                 }
                 if (!list.isEmpty()) {
                     map.put(user.getEmail(), list);
