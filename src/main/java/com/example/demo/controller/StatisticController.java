@@ -9,10 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.TreeMap;
+import java.util.*;
 
 @RestController
 @RequestMapping("/statistics")
@@ -29,7 +26,7 @@ public class StatisticController {
     }
 
     @GetMapping("get_statistics_for_user")
-    public TreeMap<String, List<String>> findStatisticsForUser(@RequestParam String email) throws IllegalAccessException {
+    public TreeMap<String, List<String>> getStatisticsForUser(@RequestParam String email) throws IllegalAccessException {
         UsageStatistics usageStatistics = statisticsRepository.findById(email).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Statistics not found"));
         TreeMap<String, List<String>> mapList = new TreeMap<>();
@@ -65,8 +62,8 @@ public class StatisticController {
     }
 
     @GetMapping("get_all_statistics")
-    public TreeMap<String, TreeMap<String, List<String>>> findAllStatistics() throws IllegalAccessException {
-        TreeMap<String, TreeMap<String, List<String>>> returnMap = new TreeMap<>();
+    public TreeMap<String, TreeMap<String, List<String>>> getAllStatistics() throws IllegalAccessException {
+        TreeMap<String, TreeMap<String, List<String>>> returnMap = new TreeMap<>(Collections.reverseOrder());
         for (UsageStatisticsYesterday usd : dateRepository.findAll()) {
             TreeMap<String, List<String>> treeMap = new TreeMap<>();
             List<UsageStatistics> usageStatisticsList = new ArrayList<>(usd.getUsageStatisticsList());
