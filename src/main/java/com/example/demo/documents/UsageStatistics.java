@@ -11,6 +11,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Builder
 @Document(collection = "UsageStatisticsToday")
 public class UsageStatistics {
+    private String time;
     @Id
     private String name;
     private ObjectUserStatistics objectUserStatistics;
