@@ -70,7 +70,7 @@ public class StatisticController {
             for (UsageStatistics us : usageStatisticsList) {
                 serializerField(treeMap,us,us.getObjectGeneralStatistics(),us.getObjectUserStatistics());
             }
-            returnMap.put(usd.getDate(), treeMap);
+            returnMap.put("------------- (" + usd.getDate() + ") -------------", treeMap);
         }
         return returnMap;
     }
@@ -121,6 +121,6 @@ public class StatisticController {
             }
             map.remove(field.getName());
         }
-        mapList.put(usageStatistics.getName(), list);
+        mapList.put("         " + usageStatistics.getName(), list);
     }
 }
