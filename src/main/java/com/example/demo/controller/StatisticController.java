@@ -28,7 +28,7 @@ public class StatisticController {
         this.dateRepository = dateRepository;
     }
 
-    @GetMapping("find_statistics_for_user")
+    @GetMapping("get_statistics_for_user")
     public TreeMap<String, List<String>> findStatisticsForUser(@RequestParam String email) throws IllegalAccessException {
         UsageStatistics usageStatistics = statisticsRepository.findById(email).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Statistics not found"));
@@ -64,9 +64,9 @@ public class StatisticController {
         return mapList;
     }
 
-    @GetMapping("find_all_statistics")
-    public HashMap<String, TreeMap<String, List<String>>> findAllStatistics() throws IllegalAccessException {
-        HashMap<String, TreeMap<String, List<String>>> returnMap = new HashMap<>();
+    @GetMapping("get_all_statistics")
+    public TreeMap<String, TreeMap<String, List<String>>> findAllStatistics() throws IllegalAccessException {
+        TreeMap<String, TreeMap<String, List<String>>> returnMap = new TreeMap<>();
         for (UsageStatisticsYesterday usd : dateRepository.findAll()) {
             TreeMap<String, List<String>> treeMap = new TreeMap<>();
             List<UsageStatistics> usageStatisticsList = new ArrayList<>(usd.getUsageStatisticsList());
