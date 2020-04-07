@@ -25,13 +25,13 @@ public class StatisticController {
         this.dateRepository = dateRepository;
     }
 
-    @GetMapping("get_statistics_for_user")
-    public TreeMap<String, List<String>> getStatisticsForUser(@RequestParam String email) throws IllegalAccessException {
+    @GetMapping("get_statistics_by_email")
+    public TreeMap<String, List<String>> getStatisticsByEmail(@RequestParam String email) throws IllegalAccessException {
         UsageStatistics usageStatistics = statisticsRepository.findById(email).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Statistics not found"));
         TreeMap<String, List<String>> mapList = new TreeMap<>();
-        serializerField(mapList,usageStatistics,usageStatistics.getObjectGeneralStatistics()
-                ,usageStatistics.getObjectUserStatistics());
+        serializerField(mapList, usageStatistics, usageStatistics.getObjectGeneralStatistics()
+                , usageStatistics.getObjectUserStatistics());
         return mapList;
     }
 
@@ -68,7 +68,7 @@ public class StatisticController {
             TreeMap<String, List<String>> treeMap = new TreeMap<>();
             List<UsageStatistics> usageStatisticsList = new ArrayList<>(usd.getUsageStatisticsList());
             for (UsageStatistics us : usageStatisticsList) {
-                serializerField(treeMap,us,us.getObjectGeneralStatistics(),us.getObjectUserStatistics());
+                serializerField(treeMap, us, us.getObjectGeneralStatistics(), us.getObjectUserStatistics());
             }
             returnMap.put("_____________(" + usd.getDate() + ")_____________", treeMap);
         }
@@ -81,12 +81,23 @@ public class StatisticController {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Admin unauthorized");
         statisticsRepository.deleteAll();
         dateRepository.deleteAll();
+        throw new ResponseStatusException(HttpStatus.OK, "All statistics DELETED!!!");
     }
 
 //    @GetMapping("findAll")
 //    public List<UsageStatisticsYesterday> findAllStat() {
 //        return dateRepository.findAll();
 //    }
+
+    @DeleteMapping("del_statistics_by_email")
+    public void delStatisticsByEmail(@RequestHeader("Authorization") String tokenAdmin, @RequestParam String stat) {
+        if (!tokenAdmin.equals("YW5hdG9seUBtYWlsLmNvbTpBbmF0b2x5MjAyMDIw"))
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Admin unauthorized");
+        UsageStatistics usr = statisticsRepository.findById(stat)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Not found!!!!!"));
+        statisticsRepository.delete(usr);
+        throw new ResponseStatusException(HttpStatus.OK, "Statistics By " + stat + " DELETED!!!");
+    }
 
     private static void serializerField(TreeMap<String, List<String>> mapList
             , UsageStatistics usageStatistics
