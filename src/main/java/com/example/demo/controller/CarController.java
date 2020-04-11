@@ -1,7 +1,7 @@
 package com.example.demo.controller;
 
-import com.example.demo.documents.*;
 import com.example.demo.CarComparatorBookedPeriod;
+import com.example.demo.documents.*;
 import com.example.demo.repository.CarRepository;
 import com.example.demo.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +15,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.TreeMap;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/car")
