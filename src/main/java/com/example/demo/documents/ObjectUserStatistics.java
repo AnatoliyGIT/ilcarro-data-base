@@ -26,4 +26,6 @@ public class ObjectUserStatistics {
     private int getInvoice = 0;
     private int authUser = 0;
     private int getHistory = 0;
+    private int getFiveFavoritesCars = 0;
+    private int getLastOrder = 0;
 }
