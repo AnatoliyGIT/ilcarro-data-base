@@ -3,6 +3,7 @@ package com.example.demo.controller;
 import com.example.demo.documents.*;
 import com.example.demo.repository.UsageStatisticsDateRepository;
 import com.example.demo.repository.UsageStatisticsRepository;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -25,6 +26,7 @@ public class StatisticController {
         this.dateRepository = dateRepository;
     }
 
+    @ApiOperation(value = "(ПОЛУЧИТЬ статистику использования хоста СЕГОДНЯ, конкретным ЮЗЕРОМ)")
     @GetMapping("get_statistics_by_email")
     public TreeMap<String, List<String>> getStatisticsByEmail(@RequestParam String email) throws IllegalAccessException {
         UsageStatistics usageStatistics = statisticsRepository.findById(email).orElseThrow(
@@ -35,6 +37,7 @@ public class StatisticController {
         return mapList;
     }
 
+    @ApiOperation(value = "(ПОЛУЧИТЬ статистику использования хоста за СЕГОДНЯ)")
     @GetMapping("get_statistics_today")
     public TreeMap<String, List<String>> getStatisticsToday() throws IllegalAccessException {
         List<ObjectGeneralStatistics> objectGeneralStatisticsList = new ArrayList<>();
@@ -61,6 +64,7 @@ public class StatisticController {
         return mapList;
     }
 
+    @ApiOperation(value = "(ПОЛУЧИТЬ всю статистику использования хоста до вчерашнего дня включительно)")
     @GetMapping("get_all_statistics")
     public TreeMap<String, TreeMap<String, List<String>>> getAllStatistics() throws IllegalAccessException {
         TreeMap<String, TreeMap<String, List<String>>> returnMap = new TreeMap<>(Collections.reverseOrder());
@@ -75,6 +79,7 @@ public class StatisticController {
         return returnMap;
     }
 
+    @ApiOperation(value = "(УДАЛИТЬ с репозитория всю СТАТИСТИКУ использования)")
     @DeleteMapping("delete_all_statistics")
     public void deleteAllStatistics(@RequestHeader("Authorization") String tokenAdmin) {
         if (!tokenAdmin.equals("YW5hdG9seUBtYWlsLmNvbTpBbmF0b2x5MjAyMDIw"))
@@ -84,11 +89,7 @@ public class StatisticController {
         throw new ResponseStatusException(HttpStatus.OK, "All statistics DELETED!!!");
     }
 
-//    @GetMapping("findAll")
-//    public List<UsageStatisticsYesterday> findAllStat() {
-//        return dateRepository.findAll();
-//    }
-
+    @ApiOperation(value = "(УДАЛИТЬ всю статистику ЮЗЕРА)")
     @DeleteMapping("del_statistics_by_email")
     public void delStatisticsByEmail(@RequestHeader("Authorization") String tokenAdmin, @RequestParam String stat) {
         if (!tokenAdmin.equals("YW5hdG9seUBtYWlsLmNvbTpBbmF0b2x5MjAyMDIw"))

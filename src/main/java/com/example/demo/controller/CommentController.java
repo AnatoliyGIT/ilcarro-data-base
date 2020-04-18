@@ -4,9 +4,8 @@ import com.example.demo.documents.Car;
 import com.example.demo.documents.Comment;
 import com.example.demo.repository.CarRepository;
 import com.example.demo.repository.UserRepository;
-import io.swagger.models.Response;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.util.BsonUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -31,6 +30,7 @@ public class CommentController {
         this.userRepository = userRepository;
     }
 
+    @ApiOperation(value = "(ПОЛУЧИТЬ все комментарии)")
     @GetMapping(value = "/all_comments/")
     public List<Comment> findAllComments() {
         List<Comment> comments = new ArrayList<>();
@@ -38,6 +38,7 @@ public class CommentController {
         return comments;
     }
 
+    @ApiOperation(value = "(ПОЛУЧИТЬ комментарии на конкретную машину)")
     @GetMapping(value = "/comments_by_car/")
     public List<Comment> findCommentsBySerialNumber(@RequestParam String serial_number) {
         Car car = carRepository.findById(serial_number)

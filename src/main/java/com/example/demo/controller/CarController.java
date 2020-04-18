@@ -4,6 +4,7 @@ import com.example.demo.CarComparatorBookedPeriod;
 import com.example.demo.documents.*;
 import com.example.demo.repository.CarRepository;
 import com.example.demo.repository.UserRepository;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -23,6 +24,9 @@ public class CarController {
 
     CarRepository carRepository;
     UserRepository userRepository;
+    DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+    Comparator<String> comparator = Comparator.comparingInt(String::length);
+    Comparator<Car> CarMakeComparator = Comparator.comparing(Car::getMake);
 
     @Autowired
     public CarController(CarRepository carRepository, UserRepository userRepository) {
@@ -30,7 +34,7 @@ public class CarController {
         this.userRepository = userRepository;
     }
 
-
+    @ApiOperation(value = "(ПОЛУЧИТЬ ОВНЕРА по машине)")
     @GetMapping("find_owner_by_car")
     public String findOwnerByCar(@RequestParam String serial_number) {
         Car car = carRepository.findById(serial_number)
@@ -42,6 +46,7 @@ public class CarController {
                 + ") Owner: " + owner.getEmail() + " (" + owner.getFirstName() + ")";
     }
 
+    @ApiOperation(value = "(ПОЛУЧИТЬ всех ОВНЕРОВ)")
     @GetMapping
     public TreeMap<String, String> findOwners() {
         TreeMap<String, String> carMap = new TreeMap<>();
@@ -52,10 +57,10 @@ public class CarController {
             numbers.add(car.getSerial_number());
             models.add(car.getMake() + " " + car.getModel());
         }
-        numbers.sort(comparator);
-        models.sort(comparator);
-        int numbersCounts = numbers.get(numbers.size() - 1).length() + 1;
-        int modelsCounts = models.get(models.size() - 1).length() + 3;
+        numbers.sort(comparator.reversed());
+        models.sort(comparator.reversed());
+        int numbersCounts = numbers.get(0).length() + 1;
+        int modelsCounts = models.get(0).length() + 3;
         for (Car car : cars) {
             StringBuilder str1 = new StringBuilder();
             StringBuilder str2 = new StringBuilder();
@@ -73,6 +78,7 @@ public class CarController {
         return carMap;
     }
 
+    @ApiOperation(value = "(ПОЛУЧИТЬ все МАШИНЫ с их геолокацией)")
     @GetMapping(value = "/geo/all/")
     public List<String> findGeoCars() {
         List<String> carList = new ArrayList<>();
@@ -84,10 +90,10 @@ public class CarController {
             numbers.add(car.getSerial_number());
             models.add(car.getMake() + " " + car.getModel());
         }
-        numbers.sort(comparator);
-        models.sort(comparator);
-        int numbersCounts = numbers.get(numbers.size() - 1).length() + 3;
-        int modelsCounts = models.get(models.size() - 1).length() + 3;
+        numbers.sort(comparator.reversed());
+        models.sort(comparator.reversed());
+        int numbersCounts = numbers.get(0).length() + 3;
+        int modelsCounts = models.get(0).length() + 3;
         for (Car car : cars) {
             StringBuilder str1 = new StringBuilder();
             StringBuilder str2 = new StringBuilder();
@@ -104,6 +110,7 @@ public class CarController {
         return carList;
     }
 
+    @ApiOperation(value = "(ПОЛУЧИТЬ все букед периоды конкретной МАШИНЫ (TreeMap<String, String>))")
     @GetMapping(value = "/booked_pay/")
     public TreeMap<String, String> findBookedPay(@RequestParam String serial_number) {
         Car car = carRepository.findById(serial_number)
@@ -125,10 +132,8 @@ public class CarController {
         for (String key : idBooked.keySet()) {
             for (String keyB : mapUser.keySet()) {
                 if (key.equals(keyB)) {
-                    String start_date_time = idBooked.get(key).getStart_date_time()
-                            .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
-                    String end_date_time = idBooked.get(key).getEnd_date_time()
-                            .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+                    String start_date_time = idBooked.get(key).getStart_date_time().format(timeFormatter);
+                    String end_date_time = idBooked.get(key).getEnd_date_time().format(timeFormatter);
                     mapResponse.put(start_date_time + " - " + end_date_time, mapUser.get(keyB));
                 }
             }
@@ -138,6 +143,7 @@ public class CarController {
         return mapResponse;
     }
 
+    @ApiOperation(value = "(ПОЛУЧИТЬ букед периоды всех МАШИН)")
     @GetMapping(value = "/booked_all_cars/")
     public TreeMap<String, List<String>> findBookedAllCars() {
         TreeMap<String, List<String>> mapResponse = new TreeMap<>();
@@ -186,6 +192,7 @@ public class CarController {
         return mapResponse;
     }
 
+    @ApiOperation(value = "(ПОЛУЧИТЬ все периоды резервирования ОВНЕРОМ всех МАШИН)")
     @GetMapping(value = "/reserved_all_cars/")
     public TreeMap<String, List<String>> findReservedAllCars() {
         TreeMap<String, List<String>> mapResponse = new TreeMap<>();
@@ -202,12 +209,14 @@ public class CarController {
         return mapResponse;
     }
 
+    @ApiOperation(value = "(ПОЛУЧИТЬ МАШИНУ по номеру (Car))")
     @GetMapping("/getCar/")
     public Car getCar(@RequestParam String serial_number) {
         return carRepository.findById(serial_number)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Car not found"));
     }
 
+    @ApiOperation(value = "(ПОЛУЧИТЬ всю статистику всех МАШИН)")
     @GetMapping("/get_statistics/")
     public List<String> getStatistics() {
         List<Car> list = carRepository.findAll();
@@ -217,8 +226,8 @@ public class CarController {
         for (Car car : list) {
             numbers.add(car.getSerial_number());
         }
-        numbers.sort(comparator);
-        int numbersCounts = numbers.get(numbers.size() - 1).length() + 3;
+        numbers.sort(comparator.reversed());
+        int numbersCounts = numbers.get(0).length() + 3;
         for (Car car : list) {
             StringBuilder str = new StringBuilder();
             for (int i = 0; i < numbersCounts - car.getSerial_number().length(); i++) {
@@ -230,6 +239,7 @@ public class CarController {
         return stringList;
     }
 
+    @ApiOperation(value = "(УДАЛИТЬ лист поездок конткретной МАШИНЫ)")
     @DeleteMapping("/del_trips_by_car")
     public String delTrips(@RequestHeader("Authorization") String tokenAdmin, @RequestParam String serial_number) {
         if (!tokenAdmin.equals("YW5hdG9seUBtYWlsLmNvbTpBbmF0b2x5MjAyMDIw"))
@@ -253,6 +263,7 @@ public class CarController {
         return str + " -> " + car.getStatistics().getRating().toString();
     }
 
+    @ApiOperation(value = "(УДАЛИТЬ букед бериод по UUID, ЮЗЕРУ и МАШИНЕ)")
     @DeleteMapping("delete_bookedPeriod_by_bookedId_User")
     public void delBookedPeriod(@RequestHeader String tokenAdmin, @RequestParam String email,
                                 @RequestParam String bookedId, @RequestParam String serial_number) {
@@ -265,9 +276,6 @@ public class CarController {
                 .equals(serial_number)).findFirst()
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Car not found"));
         ArrayList<BookedPeriod> bookedPeriodList = car.getBooked_periods();
-        BookedPeriod bookedPeriod = bookedPeriodList.stream().filter(per -> per.getOrder_id().equals(bookedId))
-                .findFirst()
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "BookedPeriod not found"));
         bookedPeriodList.removeIf(per -> per.getOrder_id().equals(bookedId));
         car.setBooked_periods(bookedPeriodList);
         cars.removeIf(c -> c.getSerial_number().equals(serial_number));
@@ -276,11 +284,14 @@ public class CarController {
         userRepository.save(user);
     }
 
+    @ApiOperation(value = "(ПОЛУЧИТЬ три популярные МАШИНЫ)")
     @GetMapping(value = "/tree_cars/")
     public List<Car> findTreePopularCars() {
         return carRepository.getThreePopularsCar();
     }
 
+
+    @ApiOperation(value = "(ПОЛУЧИТЬ текущее время у каждой МАШИНЫ (РАСЧЕТНОЕ))")
     @GetMapping(value = "/time/")
     public List<String> findTimesForCar() {
         List<Car> cars = carRepository.findAll();
@@ -298,12 +309,12 @@ public class CarController {
             }
             list.add(car.getSerial_number() + " " + str + " " + LocalDateTime.now()
                     .plusHours(correctionTimeZone(car.getPick_up_place()
-                            .getGeolocation().getLongitude()) + 1).format(DateTimeFormatter
-                            .ofPattern("HH:mm dd.MM.yyyy")));
+                            .getGeolocation().getLongitude()) + 1).format(timeFormatter));
         }
         return list;
     }
 
+    @ApiOperation(value = "(УДАЛИТЬ НЕ ОПЛАЧЕННЫЙ (paid = false) букед период)")
     @DeleteMapping(value = "delete_period_false")
     public void deletePeriodFalse(@RequestHeader("Authorization") String tokenAdmin
             , @RequestParam String serial_number_auto, @RequestParam String bookedId) {
@@ -318,6 +329,7 @@ public class CarController {
 
     }
 
+    @ApiOperation(value = "(ПОЛУЧИТЬ все букед периоды конкретной МАШИНЫ (List<BookedPeriod>))")
     @GetMapping(value = "find_booked_periods")
     public List<BookedPeriod> findBookedPeriods(@RequestParam String serial_number) {
         Car car = carRepository.findById(serial_number)
@@ -329,7 +341,4 @@ public class CarController {
         int longitude = (int) Math.floor(l);
         return Math.floorDiv(longitude, 15);
     }
-
-    Comparator<String> comparator = Comparator.comparingInt(String::length);
-    Comparator<Car> CarMakeComparator = Comparator.comparing(Car::getMake);
 }

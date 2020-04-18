@@ -3,16 +3,14 @@ package com.example.demo.controller;
 import com.example.demo.documents.*;
 import com.example.demo.repository.CarRepository;
 import com.example.demo.repository.UserRepository;
+import io.swagger.annotations.ApiOperation;
 import org.bson.internal.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.TreeMap;
+import java.util.*;
 
 @RestController
 @RequestMapping("/user")
@@ -21,6 +19,8 @@ public class UserController {
     UserRepository userRepository;
     CarRepository carRepository;
     TreeMap<Integer, String> map = new TreeMap<>();
+    Comparator<String> lengthComparator = Comparator.comparingInt(String::length);
+    Comparator<User> emailComparator = Comparator.comparing(User::getEmail);
 
     @Autowired
     public UserController(UserRepository userRepository, CarRepository carRepository) {
@@ -28,6 +28,7 @@ public class UserController {
         this.carRepository = carRepository;
     }
 
+    @ApiOperation(value = "(ПОЛУЧИТЬ токены всех ЮЗЕРОВ)")
     @GetMapping(value = "/find_tokens/")
     public TreeMap<Integer, String> findTokens(@RequestHeader("Authorization") String tokenAdmin) {
         if (!tokenAdmin.equals("YW5hdG9seUBtYWlsLmNvbTpBbmF0b2x5MjAyMDIw"))
@@ -42,7 +43,7 @@ public class UserController {
         for (User user : users) {
             String strS = "";
             StringBuilder strSpace = new StringBuilder();
-            for (int i = 0; i < symbolsCounts-user.getEmail().length(); i++) {
+            for (int i = 0; i < symbolsCounts - user.getEmail().length(); i++) {
                 strSpace.append("-");
             }
             String email = user.getEmail();
@@ -61,6 +62,7 @@ public class UserController {
         return map;
     }
 
+    @ApiOperation(value = "(ПОЛУЧИТЬ пароли всех ЮЗЕРОВ)")
     @GetMapping(value = "/find_passwords/")
     public TreeMap<Integer, String> findPasswords(@RequestHeader("Authorization") String tokenAdmin) {
         if (!tokenAdmin.equals("YW5hdG9seUBtYWlsLmNvbTpBbmF0b2x5MjAyMDIw"))
@@ -75,7 +77,7 @@ public class UserController {
         for (User user : users) {
             String strS = "";
             StringBuilder strSpace = new StringBuilder();
-            for (int i = 0; i < symbolsCounts-user.getEmail().length(); i++) {
+            for (int i = 0; i < symbolsCounts - user.getEmail().length(); i++) {
                 strSpace.append("-");
             }
             String email = user.getEmail();
@@ -91,6 +93,7 @@ public class UserController {
         return map;
     }
 
+    @ApiOperation(value = "(УДАЛЕНИЕ всех листов у ЮЗЕРА)")
     @DeleteMapping(value = "/delete_all_lists_from_user/")
     public void deleteAllLists(@RequestHeader("Authorization") String tokenAdmin, String email) {
         if (!tokenAdmin.equals("YW5hdG9seUBtYWlsLmNvbTpBbmF0b2x5MjAyMDIw"))
@@ -125,6 +128,7 @@ public class UserController {
         userRepository.save(user);
     }
 
+    @ApiOperation(value = "(ПОЛУЧИТЬ все UUID Букед периодов у всех ЮЗЕРОВ)")
     @GetMapping(value = "/find_booked_cars_all_users/")
     public TreeMap<String, List<String>> findBookedAllUsers() {
         TreeMap<String, List<String>> mapResponse = new TreeMap<>();
@@ -141,6 +145,7 @@ public class UserController {
         return mapResponse;
     }
 
+    @ApiOperation(value = "(ПОЛУЧИТЬ историю и периоды бронирования всех ЮЗЕРОВ)")
     @GetMapping(value = "/find_histories_all_users/")
     public TreeMap<String, List<String>> findHistoryAllUsers() {
         TreeMap<String, List<String>> mapResponse = new TreeMap<>();
@@ -162,6 +167,7 @@ public class UserController {
         return mapResponse;
     }
 
+    @ApiOperation(value = "(ПОЛУЧИТЬ удалённых ЮЗЕРОВ)")
     @GetMapping(value = "/find_deleted_users/")
     public List<String> findDeletedUsers() {
         List<String> list = new ArrayList<>();
@@ -173,6 +179,7 @@ public class UserController {
         return list;
     }
 
+    @ApiOperation(value = "(УДАЛИТЬ ЮЗЕРА со всеми его машинами)")
     @DeleteMapping(value = "/delete_user_with_cars")
     public void deleteUserByEmail(@RequestHeader("Authorization") String tokenAdmin, String email) {
         if (!tokenAdmin.equals("YW5hdG9seUBtYWlsLmNvbTpBbmF0b2x5MjAyMDIw"))
@@ -184,6 +191,7 @@ public class UserController {
         userRepository.delete(user);
     }
 
+    @ApiOperation(value = "(ПОЛУЧИТЬ общее количество ЮЗЕРОВ и МАШИН в репозитории)")
     @GetMapping(value = "/find_counts_users_and_cars")
     public String[] findCounts() {
         String[] counts = new String[3];
@@ -203,6 +211,7 @@ public class UserController {
         return counts;
     }
 
+    @ApiOperation(value = "(ПОЛУЧИТЬ список ОВНЕРОВ и список их МАШИН)")
     @GetMapping(value = "/find_cars_and_owners")
     public TreeMap<String, List<String>> findCars() {
         TreeMap<String, List<String>> map = new TreeMap<>();
@@ -222,6 +231,7 @@ public class UserController {
         return map;
     }
 
+    @ApiOperation(value = "(УДАЛИТЬ всю историю у ЮЗЕРА)")
     @DeleteMapping("/delHistory")
     public void delHistory(@RequestHeader("Authorization") String tokenAdmin, String email) {
         if (!tokenAdmin.equals("YW5hdG9seUBtYWlsLmNvbTpBbmF0b2x5MjAyMDIw"))
@@ -232,6 +242,7 @@ public class UserController {
         userRepository.save(user);
     }
 
+    @ApiOperation(value = "(АКТИВИРОВАТЬ удалённого ЮЗЕРА)")
     @PostMapping("activate_user")
     public void activateUser(@RequestHeader("Authorization") String tokenAdmin, @RequestParam String email) {
         if (!tokenAdmin.equals("YW5hdG9seUBtYWlsLmNvbTpBbmF0b2x5MjAyMDIw"))
@@ -242,6 +253,7 @@ public class UserController {
         userRepository.save(user);
     }
 
+    @ApiOperation(value = "(ПОМЕНЯТЬ пароль у ЮЗЕРА)")
     @PostMapping("change_password")
     public void changePasswordUser(@RequestHeader("Authorization") String tokenAdmin
             , @RequestParam String email, @RequestParam String newPassword) {
@@ -255,6 +267,38 @@ public class UserController {
         userRepository.save(user);
     }
 
-    Comparator<String> lengthComparator = Comparator.comparingInt(String::length);
-    Comparator<User> emailComparator = Comparator.comparing(User::getEmail);
+
+    @ApiOperation(value = "(ПОЛУЧИТЬ всех ЮЗЕРОВ, которые катались на этой машине")
+    @GetMapping("find_booking_users_by_car")
+    public List<String> findBookingUsersByCar(@RequestParam String serial_number) {
+        if (!carRepository.findById(serial_number).isPresent()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Car not Found");
+        }
+        Map<String, Integer> res = new HashMap<>();
+        List<String> stringList = new ArrayList<>();
+        for (User user : userRepository.findAll()) {
+            int count = 0;
+            for (BookedCars bookedCar : user.getBookedCars()) {
+                if (bookedCar.getSerial_number().equals(serial_number)) {
+                    count++;
+                    res.put(user.getEmail(), count);
+                }
+            }
+        }
+        if (res.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Booking users not founds");
+        }
+        List<String> strings = new ArrayList<>(res.keySet());
+        strings.sort((Comparator.comparing(String::length).reversed()));
+        int numbersCounts = strings.get(0).length() + 3;
+        for (String email : strings) {
+            StringBuilder str = new StringBuilder();
+            for (int i = 0; i < numbersCounts - email.length(); i++) {
+                str.append("-");
+            }
+            stringList.add(email + " " + str + " " + res.get(email));
+        }
+        stringList.sort(Comparator.comparing(String::toString));
+        return stringList;
+    }
 }

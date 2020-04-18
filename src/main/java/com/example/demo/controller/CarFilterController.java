@@ -1,17 +1,15 @@
 package com.example.demo.controller;
 
-import com.example.demo.documents.Car;
 import com.example.demo.documents.Filter;
 import com.example.demo.repository.CarFilterRepository;
 import com.example.demo.repository.FilterUpdateRepository;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/filter")
@@ -27,6 +25,7 @@ public class CarFilterController {
         this.filterUpdateRepository = filterUpdateRepository;
     }
 
+    @ApiOperation(value = "(УДАЛИТЬ весь фильтр)")
     @DeleteMapping("del_root")
     public void delRoot(@RequestHeader("Authorization") String tokenAdmin) {
         if (!tokenAdmin.equals("YW5hdG9seUBtYWlsLmNvbTpBbmF0b2x5MjAyMDIw"))
